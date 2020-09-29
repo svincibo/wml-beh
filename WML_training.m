@@ -36,9 +36,9 @@ prefs.group_label = training_group_labels{prefs.group};
 % this as day 1. If yes, count how many and set day appropriately.
 if exist(fullfile(rootDir, 'data',['sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
     disp('Records suggest that this participant has already completed 4 days of training! This is not possible.');
-    ch = input('Are you sure that you have entered the participant ID correctly [y, n]?');
-    if strcmp(ch, 'yes')
-        ch2 = input('If you are sure that you have entered the participant ID correctly, then enter the correct day here [1, 2, 3, 4]:');
+    ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
+    if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
+        ch2 = str2num(input('If you are sure that you have entered the participant ID correctly, then enter the correct day here [1, 2, 3, 4]: ', 's'));
     else
         error('Please start over and be sure to enter the correct participant ID.');
     end
@@ -54,20 +54,31 @@ else
 end
 
 disp(['Records indicate that this is Day ' num2str(prefs.day) ' of training for this participant']);
-ch = input('Is this correct [y, n]?');
+ch = input('Is this correct [y, n]? ', 's');
 if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
-    ch2 = input('Have you entered the participant ID correctly [y, n]?');
+    ch2 = input('Have you entered the participant ID correctly [y, n]? ', 's');
     if strcmp(ch2, 'yes') || strcmp(ch2, 'YES') || strcmp(ch2, 'y') || strcmp(ch2, 'Y')
-        prefs.day = input('If you are sure that you have entered the participant ID correctly, then enter the correct day here [1, 2, 3, 4]:');
+        prefs.day = str2num(input('If you are sure that you have entered the participant ID correctly, then enter the correct day here [1, 2, 3, 4]: ', 's'));
     elseif strcmp(ch2, 'no')
         error('Please start over and be sure to enter the correct participant ID.');
     end
+else
+    disp('..............starting training program.............');
 end
 clear ch ch2
 
-% Add if statement here to determine which training group this participant
-% should go to
-
+% Import yoked stimuli if this is a Watch Dynamic participant. The second
+% column of yoke is the WD participant while the first column of yoke is
+% the DI participant.
+if prefs.group == 3
+    
+    % Get yoked subID.
+    subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
+    
+    % Import yoked subject's drawing trajectories.
+    load(fullfile(rootDir, 'data', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']));
+    
+end
 
 % % Import previous samples from subject if they exist. This is for the case
 % % where there is a glitch or a power-outage. This will allow the training
@@ -171,13 +182,17 @@ Screen('FillRect', prefs.w2, prefs.backColor);
 Screen('FillRect', prefs.w3, prefs.backColor);
 Screen('Flip', prefs.w3, [], [], [], 0); %0 to flip all onscreen windows
 
+% Set up symbol randomization blocks.
+s = [randperm(40) randperm(40) randperm(40) randperm(40) randperm(40) ...
+    randperm(40) randperm(40) randperm(40) randperm(40) randperm(40)];
+
 prefs.trial = 1;
-while prefs.trial < 30
+while prefs.trial < 3
     
     %% Symbol Stimuli
     
     % Select the symbol for this trial.
-    prefs.symbol = fullfile(tsymbol_dir(prefs.trial).folder, tsymbol_dir(prefs.trial).name);
+    prefs.symbol = fullfile(tsymbol_dir(s(prefs.trial)).folder, tsymbol_dir(s(prefs.trial)).name);
     
     % Load it ahead of time.
     prefs.symbol_array = imread(prefs.symbol);
@@ -204,8 +219,11 @@ while prefs.trial < 30
         
     elseif prefs.group == 3
         
+        % Find the appropriate symbol.
+        idx = find(contains(sample.symbolName, prefs.symbol));
+        
         % Get trajectory for this trial.
-        %         trajectory =
+        %         trajectory = sample(idx).dynamicStimuli'
         
         [prefs] = watchDynamic(prefs, trajectory);
         
