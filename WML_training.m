@@ -24,7 +24,13 @@ commandwindow;
 
 % User input.
 prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101): ', 's')));%'101';
-
+disp(['You have indicated that this is participant ' num2str(prefs.subID) '. This is a ' prefs.group_label ' participant.']);
+ch = input('Is this information correct [y, n]? ', 's');
+if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
+    error('Please start over and be sure to enter the correct participant ID.');
+end
+clear ch
+    
 % Load in the mapping between the subID and training group.
 load(fullfile(rootDir, 'WML_subID_trainingroup_mapping.mat'));
 
@@ -63,7 +69,7 @@ if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
         error('Please start over and be sure to enter the correct participant ID.');
     end
 else
-    disp('..............starting training program.............');
+    disp('..............starting.............');
 end
 clear ch ch2
 
@@ -73,10 +79,10 @@ clear ch ch2
 if prefs.group == 3
     
     % Get yoked subID.
-    subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
+    prefs.subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
     
     % Import yoked subject's drawing trajectories.
-    load(fullfile(rootDir, 'data', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']));
+    load(fullfile(rootDir, 'data', ['sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
     
 end
 
@@ -219,21 +225,22 @@ while prefs.trial < 3
         
     elseif prefs.group == 3
         
-        % Find the appropriate symbol.
-        idx = find(contains(sample.symbolName, prefs.symbol));
+        % Find the appropriate symbol. Loop because sample is struct.
+        for k = 1:size(sample, 2)
+            if strcmp(sample(k).symbol, prefs.symbol)
+                idx2 = k;
+            end
+        end
         
-        % Get trajectory for this trial.
-        %         trajectory = sample(idx).dynamicStimuli'
-        
-        [prefs] = watchDynamic(prefs, trajectory);
+        % Display.
+        [prefs] = watchDynamic(prefs, sample(idx2).dynamicStim);
         
     else
         
         error('Training group must be 1, 2, or 3.');
         
     end
-    
-    
+     
     % As long as this is not the first round,
     if prefs.trial == 1
         
@@ -275,7 +282,7 @@ while prefs.trial < 3
 end
 
 % Save static and dynamic stimuli as a mat file.
-save(['visualStim/' prefs.subID], 'sample');
+save(fullfile(rootDir, 'data', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), 'sample');
 
 %% Close all.
 clear PsychImaging;
