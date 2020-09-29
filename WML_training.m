@@ -23,13 +23,47 @@ Screen('Preference', 'VisualDebugLevel', 0);
 commandwindow;
 
 % User input.
-prefs.subID = strtrim(deblank(input('\nPlease enter the subID number (e.g., 101): ', 's')));%'101';
+prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101): ', 's')));%'101';
 
 % Load in the mapping between the subID and training group.
-load('WML_subID_trainingroup_mapping.mat');
+load(fullfile(rootDir, 'WML_subID_trainingroup_mapping.mat'));
+
+% Set group training variables.
+prefs.group = training_group(find(subID == prefs.subID));
+prefs.group_label = training_group_labels{prefs.group};
 
 % Look to see if there are any days for this subject already, if no, set
 % this as day 1. If yes, count how many and set day appropriately.
+if exist(fullfile(rootDir, 'data',['sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
+    disp('Records suggest that this participant has already completed 4 days of training! This is not possible.');
+    ch = input('Are you sure that you have entered the participant ID correctly [y, n]?');
+    if strcmp(ch, 'yes')
+        ch2 = input('If you are sure that you have entered the participant ID correctly, then enter the correct day here [1, 2, 3, 4]:');
+    else
+        error('Please start over and be sure to enter the correct participant ID.');
+    end
+    clear ch ch2
+elseif exist(fullfile(rootDir, 'data',['sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
+    prefs.day = 3;
+elseif exist(fullfile(rootDir, 'data',['sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
+    prefs.day = 2;
+elseif exist(fullfile(rootDir, 'data',['sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
+    prefs.day = 2;
+else
+    prefs.day = 1;
+end
+
+disp(['Records indicate that this is Day ' num2str(prefs.day) ' of training for this participant']);
+ch = input('Is this correct [y, n]?');
+if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
+    ch2 = input('Have you entered the participant ID correctly [y, n]?');
+    if strcmp(ch2, 'yes') || strcmp(ch2, 'YES') || strcmp(ch2, 'y') || strcmp(ch2, 'Y')
+        prefs.day = input('If you are sure that you have entered the participant ID correctly, then enter the correct day here [1, 2, 3, 4]:');
+    elseif strcmp(ch2, 'no')
+        error('Please start over and be sure to enter the correct participant ID.');
+    end
+end
+clear ch ch2
 
 % Add if statement here to determine which training group this participant
 % should go to
@@ -110,7 +144,7 @@ else
     prefs.w2Width = prefs.w2Size(3);
     prefs.w2Height = prefs.w2Size(4);
     % Dimensions of drawing area.
-    rectForDrawing_temp = [2200 580 2600 880];
+    rectForDrawing_temp = [2250 580 2550 880];
     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-2500 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-2200];
     [prefs.w3, prefs.w3Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, rectForDrawing_temp);
     prefs.w3Width = prefs.w3Size(3);
@@ -159,45 +193,31 @@ while prefs.trial < 30
     % Move mouse to projector
     SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2))
     
-    % Get and display drawing input.
-    [prefs] = drawInk2(prefs);
-    
-    % As long as this is not the first round,
-    if prefs.trial ~= 1
+    if prefs.group == 1
         
-        % check to see if this symbol has already been done.
-        for k = 1:prefs.trial
-            
-            if strcmp(sample(k).symbol, prefs.symbol)
-                
-                % If so, insert the sample from this round into the
-                % prior location.
-                sample(k).symbol = prefs.symbol;
-                sample(k).dynamicStim = prefs.dynamicStim;
-                sample(k).dynamicStimMockTablet = prefs.dynamicStimMockTablet;
-                sample(k).staticStim = prefs.image;
-                
-                break;
-                
-            else
-                
-                % If not, append the sample from this round to the
-                % end of the sample struct.
-                sample(prefs.trial).symbol = prefs.symbol;
-                sample(prefs.trial).dynamicStim = prefs.dynamicStim;
-                sample(prefs.trial).dynamicStimMockTablet = prefs.dynamicStimMockTablet;
-                sample(prefs.trial).staticStim = prefs.image;
-                
-                % Update counter.
-                prefs.trial = prefs.trial + 1;
-                
-                break;
-                
-            end
-            
-        end
+        % Get and display drawing input.
+        [prefs] = drawInk2(prefs);
+        
+    elseif prefs.group == 2
+        
+        [prefs] = drawNoInk(prefs);
+        
+    elseif prefs.group == 3
+        
+        % Get trajectory for this trial.
+        %         trajectory =
+        
+        [prefs] = watchDynamic(prefs, trajectory);
         
     else
+        
+        error('Training group must be 1, 2, or 3.');
+        
+    end
+    
+    
+    % As long as this is not the first round,
+    if prefs.trial == 1
         
         % If it's the first round, start the sample struct.
         sample(prefs.trial).symbol = prefs.symbol;
@@ -205,8 +225,14 @@ while prefs.trial < 30
         sample(prefs.trial).dynamicStimMockTablet = prefs.dynamicStimMockTablet;
         sample(prefs.trial).staticStim = prefs.image;
         
-        % Update counter.
-        prefs.trial = prefs.trial + 1;
+    else
+        
+        % Append the sample from this round to the
+        % end of the sample struct.
+        sample(prefs.trial).symbol = prefs.symbol;
+        sample(prefs.trial).dynamicStim = prefs.dynamicStim;
+        sample(prefs.trial).dynamicStimMockTablet = prefs.dynamicStimMockTablet;
+        sample(prefs.trial).staticStim = prefs.image;
         
     end
     
@@ -225,6 +251,9 @@ while prefs.trial < 30
     % Get subID for output.
     sample(prefs.trial).subID = prefs.subID;
     
+    % Update counter.
+    prefs.trial = prefs.trial + 1;
+    
 end
 
 % Save static and dynamic stimuli as a mat file.
@@ -234,13 +263,4 @@ save(['visualStim/' prefs.subID], 'sample');
 clear PsychImaging;
 sca;
 % ShowCursor;
-
-
-
-
-
-
-
-
-
 
