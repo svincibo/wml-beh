@@ -134,6 +134,8 @@ prefs.image = Screen('GetImage', prefs.w3);
 prefs.dynamicStim = cat(1, input_lines, t);
 prefs.dynamicStimMockTablet = cat(1, input_lines, t);
 
+prefs.time = t;
+
 end
 
 

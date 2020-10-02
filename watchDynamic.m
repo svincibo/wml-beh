@@ -23,7 +23,7 @@
 % NOTE: This program requires that Psychtoolbox is installed in order to function properly
 
 % Modified on 01.01.2015 by Sophia Vinci-Booher: Increased time reliability.
-% ---Removed timestamps because it was slowing the program down too much and, in the end, was a redundancy. 
+% ---Removed timestamps because it was slowing the program down too much and, in the end, was a redundancy.
 % ---Added a restriction on the while loop that requires it to remain within a trial's alloted time.
 
 % Modified on 01.04.2015 by Sophia Vinci-Booher: Increased time fidelity.
@@ -31,45 +31,62 @@
 % time. lineData was only collected after penDown time.
 
 
-function watchDynamic(prefs, trajectory)
+function prefs = watchDynamic(prefs, trajectory)
 
 % define array to hold timestamps
 timestamps = trajectory(3, :); %%---Removed because redundant.
 
 % define array to hold line data.
-lineData = trajectory(1:2, :);
-
-% Animate Writing, draw starting point.
-Screen('DrawLines', prefs.w1, lineData(:, 1:2), prefs.penWidth, prefs.foreColor);
+line_data = trajectory(1:2, :);
 
 % Draw Frame on screen
-Screen('FillRect', prefs.w1, prefs.backColor)
-Screen('FrameRect', prefs.w1, prefs.foreColor, prefs.rectForShapes, prefs.penWidth);   % Create frame for guide.
+Screen('FillRect', prefs.w3, prefs.backColor)
+Screen('FrameRect', prefs.w3, prefs.foreColor, prefs.w3Size, prefs.penWidth);
 
 % Flip
-Screen('Flip', prefs.w1);
+Screen('Flip', prefs.w3);
+
+% Animate Writing, draw starting point.
+Screen('DrawLines', prefs.w3, line_data(:, 1:2), prefs.penWidth, prefs.foreColor);
+
+% Draw Frame on screen
+Screen('FillRect', prefs.w3, prefs.backColor)
+Screen('FrameRect', prefs.w3, prefs.foreColor, prefs.w3Size, prefs.penWidth);
+
+% Flip
+Screen('Flip', prefs.w3);
 
 i = 4; % Start here because the first 2 columns correspond to zero start values and the second 2 columns correspond to the penDown start location.
 tic;
-while i < size(lineData, 2) && toc < prefs.lengthEvents %%---Additional restriction on while loop.
+while toc < prefs.lengthEvents
     
-    % Draw Frame on screen
-    Screen('FillRect', prefs.w1, prefs.backColor)
-    Screen('FrameRect', prefs.w1, prefs.foreColor, prefs.rectForShapes, prefs.penWidth);   % Create frame for guide.
-    
-    % Draw Lines on screen.
-    Screen('DrawLines', prefs.w1, lineData(:, 1:(i)), prefs.penWidth, prefs.foreColor);
-    
-    % Wait for the initial initiation.
-    if i == 4
-        WaitSecs(timestamps(i)-timestamps(i-2));
+    while i < size(line_data, 2)
+        
+        % Draw Frame and text on screen.
+        Screen('FillRect', prefs.w3, prefs.backColor);
+        Screen('FrameRect', prefs.w3, prefs.foreColor, prefs.w3Size, prefs.penWidth);
+        
+        % Draw Lines on screen.
+        Screen('DrawLines', prefs.w3, line_data(:, 1:(i)), prefs.penWidth, prefs.foreColor);
+        
+        % Wait for the initial initiation.
+        if i == 4
+            WaitSecs(timestamps(i)-timestamps(i-2));
+        end
+        
+        % Redraw image.
+        Screen('Flip', prefs.w3);            
+            
+        % Increment to next pair of lines.
+        i = i + 2;
+        
     end
     
-    % Redraw image.
-    Screen('Flip', prefs.w1);
-    
-    % Increment to next pair of lines.
-    i = i + 2;
 end
+
+%     % Draw Frame and text on screen.
+%     Screen('FillRect', prefs.w3, prefs.backColor);
+%     Screen('FrameRect', prefs.w3, prefs.foreColor, prefs.w3Size, prefs.penWidth);
+%     Screen('Flip', prefs.w3);
 
 
