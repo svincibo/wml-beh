@@ -13,7 +13,9 @@
 
 sca; clear all; clc;
 rootDir = '~/Desktop/WML/';
-saveDir = '~/Google Drive/data/';
+saveDir = fullfile(rootDir, 'data');
+
+% saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(rootDir, 'supportFiles')));
@@ -81,6 +83,60 @@ if flag == 0
 end
 clear flag
 
+%%%%%%%%%%%%%%%%%%%%% Parameters: DO NOT CHANGE. %%%%%%%%%%%%%%%%%%%%%%%%
+prefs.penWidth = 6; % You can increase the thickness of the pen-tip by increasing this number, but there's a limit to the thickness... around 10 maybe.
+prefs.backColor = [255 255 255];   % (0 0 0) is black, (255 255 255) is white
+prefs.foreColor = [0 0 0];
+prefs.scale = 150;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Screen.
+prefs.s1 = max(Screen('Screens')); % Choose the screen that is most likely not the controller screen.
+prefs.s0 = min(Screen('Screens')); % Find primary screen.
+
+%% Select window according to number of screens present. (Assumes that the desired device for display will have the highest screen number.)
+
+% Choose dimension of window according to available screens. If only one
+% screen available, them set the window to be a short portion of it b/c
+% testing. If two screens are available, then set the window to be the
+% second screen b/c experiment.
+if isequal(prefs.s1, prefs.s0)
+    % Dimensions of primary screen
+    prefs.w0Size = [0 0 0 0];
+    prefs.w0Width = 0;
+    prefs.w0Height = 0;
+    % Dimensions of auxiliary screen
+    [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, [0 0 640 480]);
+    prefs.w1Width = prefs.w1Size(3);
+    prefs.w1Height = prefs.w1Size(4);
+    % Dimensions of stimulus presentation area.
+    prefs.rectForStim = [prefs.w1Width/2-prefs.scale/2 prefs.w1Height/2-prefs.scale/2 prefs.w1Width/2+prefs.scale/2 prefs.w1Height/2+prefs.scale/2];
+%     [250 5 390 145];
+%     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
+%     prefs.w2Width = prefs.w2Size(3);
+%     prefs.w2Height = prefs.w2Size(4);
+else
+    % Dimensions of primary screen
+    prefs.w0Size = get(prefs.s0, 'ScreenSize');
+    prefs.w0Width = prefs.w0Size(3); prefs.w0Height = prefs.w0Size(4);
+    % Dimensions of auxiliary screen.
+    [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor);
+    prefs.w1Width = prefs.w1Size(3); prefs.w1Height = prefs.w1Size(4);
+    prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
+    % Dimensions of stimulus presentation area.
+    prefs.rectForStim = [prefs.w0Width+prefs.xcenter-(prefs.scale/2) 50 prefs.w0Width+prefs.xcenter+(prefs.scale/2) 50+prefs.scale]; %
+%     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
+%     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
+%     prefs.w2Width = prefs.w2Size(3); prefs.w2Height = prefs.w2Size(4);
+end
+
+% Set the text size.
+Screen('TextSize', prefs.w1, 80);
+
+% Hide cursor and orient to the Matlab command window for user input.
+% HideCursor([], prefs.w1);
+commandwindow;
+
 % Keyboard setup
 KbName('UnifyKeyNames');
 KbCheckList = [KbName('space'),KbName('ESCAPE')];
@@ -91,14 +147,13 @@ RestrictKeysForKbCheck(KbCheckList);
 
 % Screen setup
 clear screen
-whichScreen = max(Screen('Screens')); %select desktop (min), not tablet (max)
-rect = Screen('Rect', whichScreen);
-[window1, ~] = Screen('Openwindow',whichScreen,backgroundColor,rect,[],2);
+whichScreen = prefs.s0; %0 is computer, 1 is tablet
+[window1, ~] = Screen('Openwindow',whichScreen,backgroundColor,prefs.w1Size,[],2);
 slack = Screen('GetFlipInterval', window1)/2;
-W=rect(RectRight); % screen width
-H=rect(RectBottom); % screen height
-Screen(window1,'FillRect',backgroundColor);
-Screen('Flip', window1);
+W=prefs.w1Width; % screen width
+H=prefs.w1Height; % screen height
+Screen(prefs.w1,'FillRect',prefs.backColor);
+Screen('Flip', prefs.w1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up stimuli lists and results file
@@ -145,8 +200,9 @@ randomizedTrials = randperm(nTrials);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Start screen
-Screen('DrawText',window1,'Press the space bar to begin', (W/2-300), (H/2), textColor);
-Screen('Flip',window1)
+Screen('FillRect', prefs.w1, prefs.backColor);
+PresentCenteredText(prefs.w1,'Press the space bar to begin', 90, prefs.foreColor, prefs.w1Size);
+Screen('Flip',prefs.w1)
 % Wait for subject to press spacebar
 while 1
     [keyIsDown,secs,keyCode] = KbCheck;
@@ -161,45 +217,45 @@ for t = randomizedTrials
     % Load image
     file = imgList{t};
     img = imread(fullfile(imageFolder,file));
-    imageDisplay = Screen('MakeTexture', window1, img);
+    imageDisplay = Screen('MakeTexture', prefs.w1, img);
     
-    % Calculate image position (center of the screen)
-    imageSize = size(img);
-    pos = [(W-imageSize(2))/2 (H-imageSize(1))/2 (W+imageSize(2))/2 (H+imageSize(1))/2];
+%     % Calculate image position (center of the screen)
+%     imageSize = size(img);
+%     pos = [(W-imageSize(2))/2 (H-imageSize(1))/2 (W+imageSize(2))/2 (H+imageSize(1))/2];
 
     % Screen priority
-    Priority(MaxPriority(window1));
+    Priority(MaxPriority(prefs.w1));
     Priority(2);
     
     % Show fixation cross
     fixationDuration = 0.5; % Length of fixation in seconds
-    drawCross(window1,W,H);
+    drawCross(prefs.w1,W,H);
     tFixation = Screen('Flip', window1);
 
     % Blank screen
     Screen(window1, 'FillRect', backgroundColor);
-    Screen('Flip', window1, tFixation + fixationDuration - slack,0);
+    Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
 
     % Show text item (optional)
     if showTextItem
         % Display text
         textString = textItems{t};
         textDuration = 2; % How long to show text (in seconds)
-        Screen('DrawText', window1, textString, (W/2-200), (H/2), textColor);
-        tTextdisplay = Screen('Flip', window1);
+        Screen('DrawText', prefs.w1, textString, (W/2-200), (H/2), textColor);
+        tTextdisplay = Screen('Flip', prefs.w1);
 
         % Blank screen
-        Screen(window1, 'FillRect', backgroundColor);
-        Screen('Flip', window1, tTextdisplay + textDuration - slack,0);
+        Screen(prefs.w1, 'FillRect', backgroundColor);
+        Screen('Flip', prefs.w1, tTextdisplay + textDuration - slack,0);
         Screen(tTextdisplay,'Close');
     else
         textString = '';
     end
     
     % Show the images
-    Screen(window1, 'FillRect', backgroundColor);
-    Screen('DrawTexture', window1, imageDisplay, [], pos);
-    startTime = Screen('Flip', window1); % Start of trial
+    Screen(prefs.w1, 'FillRect', backgroundColor);
+    Screen('DrawTexture', prefs.w1, imageDisplay, [], prefs.rectForStim);
+    startTime = Screen('Flip', prefs.w1); % Start of trial
     
     % Get keypress response
     rt = 0;
@@ -235,8 +291,8 @@ for t = randomizedTrials
     end
 
     % Blank screen
-    Screen(window1, 'FillRect', backgroundColor);
-    Screen('Flip', window1, tFixation + fixationDuration - slack,0);
+    Screen(prefs.w1, 'FillRect', prefs.backColor);
+    Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
     
     % Save results to file
     fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
@@ -247,8 +303,8 @@ for t = randomizedTrials
     
     % Provide a short break after a certain number of trials
     if mod(t,breakAfterTrials) == 0
-        Screen('DrawText',window1,'Break time. Press space bar when you''re ready to continue', (W/2-300), (H/2), textColor);
-        Screen('Flip',window1)
+        PresentCenteredText(prefs.w1,'Break time. Press space bar when you''re ready to continue', 90, prefs.foreColor, prefs.w1Size);
+        Screen('Flip',prefs.w1)
         % Wait for subject to press spacebar
         while 1
             [keyIsDown,secs,keyCode] = KbCheck;
