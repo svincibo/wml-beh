@@ -3,6 +3,10 @@
 % Originally written by Krista Ehinger, December 2012
 % Downloaded on Oct 2, 2020 from : http://www.kehinger.com/PTBexamples.html
 % Modified by Sophia Vinci-Booher in 2020
+
+% Add mask after a 25 ms stim presentation time, no time out for mask, forced-choice response
+% Adjust size presentation of stim so that they are similar in size (see WML_trail for example)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up the experiment (don't modify this section)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,8 +91,9 @@ RestrictKeysForKbCheck(KbCheckList);
 
 % Screen setup
 clear screen
-whichScreen = max(Screen('Screens'));
-[window1, rect] = Screen('Openwindow',whichScreen,backgroundColor,[0 0 640 480],[],2);
+whichScreen = max(Screen('Screens')); %select desktop (min), not tablet (max)
+rect = Screen('Rect', whichScreen);
+[window1, ~] = Screen('Openwindow',whichScreen,backgroundColor,rect,[],2);
 slack = Screen('GetFlipInterval', window1)/2;
 W=rect(RectRight); % screen width
 H=rect(RectBottom); % screen height
@@ -234,8 +239,8 @@ for t = randomizedTrials
     Screen('Flip', window1, tFixation + fixationDuration - slack,0);
     
     % Save results to file
-    fprintf(outputfile, '%s\t %s\t %d\t %s\t %s\t %s\t %f\n',...
-        subID, imageFolder, t, textString, file, resp, rt);
+    fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
+        prefs.subID, imageFolder, t, textString, file, resp, rt);
     
     % Clear textures
     Screen(imageDisplay,'Close');

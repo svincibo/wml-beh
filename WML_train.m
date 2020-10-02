@@ -154,8 +154,8 @@ else
     % Dimensions of auxiliary screen.
     [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor);
     prefs.w1Width = prefs.w1Size(3); prefs.w1Height = prefs.w1Size(4);
-        prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
-% Dimensions of stimulus presentation area.
+    prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
+    % Dimensions of stimulus presentation area.
     prefs.rectForStim = [prefs.w0Width+prefs.xcenter-(prefs.scale/2) 50 prefs.w0Width+prefs.xcenter+(prefs.scale/2) 50+prefs.scale]; %
     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
