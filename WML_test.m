@@ -9,6 +9,7 @@
 
 sca; clear all; clc;
 rootDir = '~/Desktop/WML/';
+saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(rootDir, 'supportFiles')));
@@ -128,8 +129,7 @@ else
 end
 
 % Set up the output file
-resultsFolder = 'data';
-outputfile = fopen([resultsFolder '/test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
+outputfile = fopen([saveDir '/test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
 fprintf(outputfile, 'subID\t imageCondition\t trial\t textItem\t imageFile\t response\t RT\n');
 
 % Randomize the trial list

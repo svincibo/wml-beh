@@ -156,12 +156,12 @@ else
     prefs.w1Width = prefs.w1Size(3); prefs.w1Height = prefs.w1Size(4);
         prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
 % Dimensions of stimulus presentation area.
-    prefs.rectForStim = [prefs.w0Width+prefs.xcenter 50 prefs.w0Width+prefs.xcenter+prefs.scale 50+prefs.scale]; %
+    prefs.rectForStim = [prefs.w0Width+prefs.xcenter-(prefs.scale/2) 50 prefs.w0Width+prefs.xcenter+(prefs.scale/2) 50+prefs.scale]; %
     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
     prefs.w2Width = prefs.w2Size(3); prefs.w2Height = prefs.w2Size(4);
     % Dimensions of drawing area.
-    prefs.rectForDrawing = [prefs.w0Width+prefs.xcenter 580 prefs.w0Width+prefs.xcenter+prefs.scale 580+prefs.scale]; %
+    prefs.rectForDrawing = [prefs.w0Width+prefs.xcenter-(prefs.scale/2) 580 prefs.w0Width+prefs.xcenter+prefs.scale/2 580+prefs.scale]; %
     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-2500 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-2200];
     [prefs.w3, prefs.w3Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForDrawing);
     prefs.w3Width = prefs.w3Size(3);
