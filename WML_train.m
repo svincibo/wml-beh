@@ -12,6 +12,7 @@
 
 sca; clear all; clc;
 rootDir = '~/Desktop/WML/';
+saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(rootDir, 'supportFiles')));
@@ -45,7 +46,7 @@ clear ch
 
 % Look to see if there are any days for this subject already, if no, set
 % this as day 1. If yes, count how many and set day appropriately.
-if exist(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
+if exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
     disp('Records suggest that this participant has already completed 4 days of training! This is not possible.');
     ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
     if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
@@ -56,11 +57,11 @@ if exist(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID) '_day4.mat'
         error('Please start over and be sure to enter the correct participant ID.');
     end
     clear ch ch2
-elseif exist(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
     prefs.day = 4; flag = 0;
-elseif exist(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
     prefs.day = 3; flag = 0;
-elseif exist(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
     prefs.day = 2; flag = 0;
 else
     prefs.day = 1; flag = 0;
@@ -95,7 +96,7 @@ if prefs.group == 3
     prefs.subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
     
     % Import yoked subject's drawing trajectories.
-    load(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
+    load(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
     
 end
 
@@ -153,16 +154,14 @@ else
     % Dimensions of auxiliary screen.
     [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor);
     prefs.w1Width = prefs.w1Size(3); prefs.w1Height = prefs.w1Size(4);
-    % Dimensions of stimulus presentation area.
-    prefs.xcenter = prefs.w1Width/2;
-    prefs.ycenter = prefs.w1Height/2;
-    prefs.rectForStim = [2250 50 2550 350];
+        prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
+% Dimensions of stimulus presentation area.
+    prefs.rectForStim = [prefs.w0Width+prefs.xcenter 50 prefs.w0Width+prefs.xcenter+prefs.scale 50+prefs.scale]; %
     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
-    prefs.w2Width = prefs.w2Size(3);
-    prefs.w2Height = prefs.w2Size(4);
+    prefs.w2Width = prefs.w2Size(3); prefs.w2Height = prefs.w2Size(4);
     % Dimensions of drawing area.
-    prefs.rectForDrawing = [2250 580 2550 880];
+    prefs.rectForDrawing = [prefs.w0Width+prefs.xcenter 580 prefs.w0Width+prefs.xcenter+prefs.scale 580+prefs.scale]; %
     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-2500 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-2200];
     [prefs.w3, prefs.w3Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForDrawing);
     prefs.w3Width = prefs.w3Size(3);
@@ -357,7 +356,7 @@ for block = 1:10
 end
 
 % Save static and dynamic stimuli as a mat file.
-save(fullfile(rootDir, 'data', ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), 'sample');
+save(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), 'sample');
 
 %% Close all.
 clear PsychImaging;

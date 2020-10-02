@@ -54,13 +54,13 @@ penUpFlag = true;
 penUpFlag2 = true;
 
 % Move mouse to projector and account for SetMouse delay on cursor updating.
-while 1
-    SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2));
-    [checkX, checkY] = GetMouse;
-    if (checkX==(ceil(prefs.w1Width / 2) + prefs.w0Width)) && (checkY==ceil(prefs.w1Height / 2))
-        break;
-    end
-end
+% while 1
+%     SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2));
+%     [checkX, checkY] = GetMouse;
+%     if (checkX==(ceil(prefs.w1Width / 2) + prefs.w0Width)) && (checkY==ceil(prefs.w1Height / 2))
+%         break;
+%     end
+% end
 
 % Start with empty screen.
 Screen('FillRect', prefs.w3, prefs.backColor);
