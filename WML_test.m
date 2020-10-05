@@ -9,10 +9,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sca; clear all; clc;
+Screen('Preference','SkipSyncTests', 1);
+PsychJavaTrouble;
 rootDir = '~/Desktop/WML/';
-saveDir = fullfile(rootDir, 'data');
+% saveDir = fullfile(rootDir, 'data');
 
-% saveDir = '~/Google Drive/data/';
+saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(rootDir, 'supportFiles')));
@@ -88,7 +90,7 @@ prefs.scale = 150;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Screen.
-prefs.s1 = max(Screen('Screens')); % Choose the screen that is most likely not the controller screen.
+% prefs.s1 = max(Screen('Screens')); % Choose the screen that is most likely not the controller screen.
 prefs.s0 = min(Screen('Screens')); % Find primary screen.
 
 %% Select window according to number of screens present. (Assumes that the desired device for display will have the highest screen number.)
@@ -96,42 +98,20 @@ prefs.s0 = min(Screen('Screens')); % Find primary screen.
 % Choose dimension of window according to available screens. If only one
 % screen available, them set the window to be a short portion of it b/c
 % testing. If two screens are available, then set the window to be the
-% second screen b/c experiment.
-if isequal(prefs.s1, prefs.s0)
-    % Dimensions of primary screen
-    prefs.w0Size = [0 0 0 0];
-    prefs.w0Width = 0;
-    prefs.w0Height = 0;
-    % Dimensions of auxiliary screen
-    [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, [0 0 640 480]);
-    prefs.w1Width = prefs.w1Size(3);
-    prefs.w1Height = prefs.w1Size(4);
-    % Dimensions of stimulus presentation area.
-    prefs.rectForStim = [prefs.w1Width/2-prefs.scale/2 prefs.w1Height/2-prefs.scale/2 prefs.w1Width/2+prefs.scale/2 prefs.w1Height/2+prefs.scale/2];
-    %     [250 5 390 145];
-    %     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
-    %     prefs.w2Width = prefs.w2Size(3);
-    %     prefs.w2Height = prefs.w2Size(4);
-else
-    % Dimensions of primary screen
-    prefs.w0Size = get(prefs.s0, 'ScreenSize');
-    prefs.w0Width = prefs.w0Size(3); prefs.w0Height = prefs.w0Size(4);
-    % Dimensions of auxiliary screen.
-    [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor);
+% % second screen b/c experiment.
+%     [prefs.w1, prefs.w1Size] = PsychImaging('OpenWindow', prefs.s0, prefs.backColor, [0 0 640 480]);
+        prefs.w1Size = [0 0 2560 1440];
     prefs.w1Width = prefs.w1Size(3); prefs.w1Height = prefs.w1Size(4);
     prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
-    % Dimensions of stimulus presentation area.
-    prefs.rectForStim = [prefs.w0Width+prefs.xcenter-(prefs.scale/2) 50 prefs.w0Width+prefs.xcenter+(prefs.scale/2) 50+prefs.scale]; %
-    %     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
-    %     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
-    %     prefs.w2Width = prefs.w2Size(3); prefs.w2Height = prefs.w2Size(4);
-end
+%     % Dimensions of stimulus presentation area.
+    prefs.rectForStim = [prefs.w1Width/2-prefs.scale/2 prefs.w1Height/2-prefs.scale/2 prefs.w1Width/2+prefs.scale/2 prefs.w1Height/2+prefs.scale/2];
+
 
 % Set the text size.
-Screen('TextSize', prefs.w1, 80);
+% Screen('TextSize', prefs.w1, 80);
 
 % Hide cursor and orient to the Matlab command window for user input.
-% HideCursor([], prefs.w1);
+HideCursor([], prefs.w1);
 commandwindow;
 
 % Keyboard setup
@@ -147,6 +127,7 @@ clear screen
 whichScreen = prefs.s0; %0 is computer, 1 is tablet
 [window1, ~] = Screen('Openwindow',whichScreen,backgroundColor,prefs.w1Size,[],2);
 slack = Screen('GetFlipInterval', window1)/2;
+prefs.w1 = window1;
 W=prefs.w1Width; % screen width
 H=prefs.w1Height; % screen height
 Screen(prefs.w1,'FillRect',prefs.backColor);
@@ -220,13 +201,13 @@ end
 for t = randomizedTrials
     
     % Load image
-    file = td_imgList{t};
-    img = imread(fullfile(td_imageFolder,file));
+    td_file = td_imgList{t};
+    img = imread(fullfile(td_imageFolder,td_file));
     td_imageDisplay = Screen('MakeTexture', prefs.w1, img);
     
     % Load noise mask
-    file = n_imgList{t};
-    img = imread(fullfile(n_imageFolder,file));
+    n_file = n_imgList{t};
+    img = imread(fullfile(n_imageFolder,n_file));
     n_imageDisplay = Screen('MakeTexture', prefs.w1, img);
     
     %     % Calculate image position (center of the screen)
@@ -317,7 +298,7 @@ for t = randomizedTrials
     
     % Save results to file
     fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
-        prefs.subID, td_imageFolder, t, textString, file, resp, rt);
+        prefs.subID, td_imageFolder, t, textString, td_file, resp, rt);
     
     % Clear textures
     Screen(td_imageDisplay,'Close');
@@ -348,6 +329,9 @@ for t = randomizedTrials
         end
     end
 end
+
+save(fullfile(rootDir, 'data', ['test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']))
+ShowCursor;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% End the experiment (don't change anything in this section)

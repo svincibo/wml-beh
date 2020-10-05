@@ -6,7 +6,7 @@
 textFile = 'none';
 
 % Response keys (optional; for no subject response use empty list)
-responseKeys = {'y','n'};
+responseKeys = {'f','j'}; % 'f = no' 'j = yes'
 %responseKeys = {};
 
 % Number of trials to show before a break (for no breaks, choose a number

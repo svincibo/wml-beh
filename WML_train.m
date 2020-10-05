@@ -173,7 +173,7 @@ end
 Screen('TextSize', prefs.w1, 80);
 
 % Hide cursor and orient to the Matlab command window for user input.
-% HideCursor([], prefs.w1);
+HideCursor([], prefs.w1);
 commandwindow;
 
 %% Record.
@@ -361,5 +361,5 @@ save(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day' num2str(
 %% Close all.
 clear PsychImaging;
 sca;
-% ShowCursor;
+ShowCursor;
 
