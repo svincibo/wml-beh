@@ -199,181 +199,180 @@ tsymbol_dir = tsymbol_dir(arrayfun(@(x) x.name(1), tsymbol_dir) ~= '.');
 %
 % % Randomize the target symbols so that they are presented in random order.
 % tsymbol_dir = tsymbol_dir(idx);
-    count = 1;
-    for block = 1:2%10
-        
-        % Set up symbol randomization for this block
-        s = randperm(40);
-        
-        for trial = 1:4%0
-            
-            
-                [keyIsDown,secs,keyCode] = KbCheck;
-    pressedKeys = find(keyCode);
+count = 1;
+for block = 1:10
     
-    % ESC key quits the experiment
-    if keyCode(KbName('ESCAPE')) == 1
-        clear all
-        close all
-        sca
-        return;
-    end
+    % Set up symbol randomization for this block
+    s = randperm(40);
     
-            disp(['Block ' num2str(block) ', trial ' num2str(trial)])
+    for trial = 1:40
+         
+        [keyIsDown,secs,keyCode] = KbCheck;
+        pressedKeys = find(keyCode);
+        
+        % ESC key quits the experiment
+        if keyCode(KbName('ESCAPE')) == 1
+            clear all
+            close all
+            sca
+            return;
+        end
+        
+        disp(['Block ' num2str(block) ', trial ' num2str(trial)])
+        
+        %% Symbol Stimuli
+        
+        % Select the symbol for this trial.
+        prefs.symbol = fullfile(tsymbol_dir(s(trial)).folder, tsymbol_dir(s(trial)).name);
+        
+        % Load it ahead of time.
+        prefs.symbol_array = imread(prefs.symbol);
+        
+        % Get symbol name for file outputs. Only looks for targets.
+        prefs.symbol_name = prefs.symbol(strfind(prefs.symbol, 'S'):end);
+        
+        % Set image in buffer.
+        t1 = Screen('MakeTexture', prefs.w2, prefs.symbol_array);
+        Screen('DrawTexture', prefs.w2, t1, [], prefs.w2Size); clear t1;
+        flip_on = Screen('Flip', prefs.w2);
+        
+        % Move mouse to projector
+        SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2))
+        
+        if prefs.group == 1
             
-            %% Symbol Stimuli
+            % Get and display drawing input.
+            [prefs] = drawInk2(prefs);
             
-            % Select the symbol for this trial.
-            prefs.symbol = fullfile(tsymbol_dir(s(trial)).folder, tsymbol_dir(s(trial)).name);
+        elseif prefs.group == 2
             
-            % Load it ahead of time.
-            prefs.symbol_array = imread(prefs.symbol);
+            [prefs] = drawNoInk(prefs);
             
-            % Get symbol name for file outputs. Only looks for targets.
-            prefs.symbol_name = prefs.symbol(strfind(prefs.symbol, 'S'):end);
+        elseif prefs.group == 3
             
-            % Set image in buffer.
-            t1 = Screen('MakeTexture', prefs.w2, prefs.symbol_array);
-            Screen('DrawTexture', prefs.w2, t1, [], prefs.w2Size); clear t1;
-            flip_on = Screen('Flip', prefs.w2);
-            
-            % Move mouse to projector
-            SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2))
-            
-            if prefs.group == 1
+            % Find the appropriate symbol. Loop because sample is struct.
+            for k = 1:size(sample, 2)
                 
-                % Get and display drawing input.
-                [prefs] = drawInk2(prefs);
-                
-            elseif prefs.group == 2
-                
-                [prefs] = drawNoInk(prefs);
-                
-            elseif prefs.group == 3
-                
-                % Find the appropriate symbol. Loop because sample is struct.
-                for k = 1:size(sample, 2)
+                % Make sure that this instance comes from the same prefs.block as
+                % it was drawn by the DI participant.
+                if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
                     
-                    % Make sure that this instance comes from the same prefs.block as
-                    % it was drawn by the DI participant.
-                    if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
-                        
-                        idx = k;
-                        
-                    end
+                    idx = k;
                     
                 end
-                
-                % Display.
-                [prefs] = watchDynamic(prefs, sample(idx).dynamicStim);
-                
-            else
-                
-                error('Training group must be 1, 2, or 3.');
                 
             end
             
-            % Append the sample from this round to the
-            % end of the sample struct.
-            sample(count).subID = prefs.subID;
-            sample(count).group = prefs.group;
-            sample(count).day = prefs.day;
-            sample(count).symbol = prefs.symbol;
-            sample(count).symbolname = prefs.symbol_name;
-            sample(count).block = block;
-            sample(count).trial = trial;
+            % Display.
+            [prefs] = watchDynamic(prefs, sample(idx).dynamicStim);
             
-            if prefs.group == 1
+        else
+            
+            error('Training group must be 1, 2, or 3.');
+            
+        end
+        
+        % Append the sample from this round to the
+        % end of the sample struct.
+        sample(count).subID = prefs.subID;
+        sample(count).group = prefs.group;
+        sample(count).day = prefs.day;
+        sample(count).symbol = prefs.symbol;
+        sample(count).symbolname = prefs.symbol_name;
+        sample(count).block = block;
+        sample(count).trial = trial;
+        
+        if prefs.group == 1
+            
+            % Save dynamic stim for yoked participant.
+            sample(count).dynamicStim = prefs.dynamicStim;
+            
+            % Save static stim.
+            sample(count).staticStim = prefs.image;
+            
+            % Write out the static image.
+            imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+            
+            if max(prefs.time)-min(prefs.time) > 0.01
                 
-                % Save dynamic stim for yoked participant.
-                sample(count).dynamicStim = prefs.dynamicStim;
-                
-                % Save static stim.
-                sample(count).staticStim = prefs.image;
-                
-                % Write out the static image.
-                imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                
-                if max(prefs.time)-min(prefs.time) > 0.01
-                    
-                    sample(count).drawduration = max(prefs.time)-min(prefs.time);
-                    
-                else
-                    sample(count).drawduration = NaN;
-                    
-                end
+                sample(count).drawduration = max(prefs.time)-min(prefs.time);
                 
             else
-                
                 sample(count).drawduration = NaN;
                 
             end
             
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            Screen('FillRect', prefs.w2, prefs.backColor);
-            Screen('FillRect', prefs.w3, prefs.backColor);
-            flip_off = Screen('Flip', prefs.w3,[], [], [], 0); %0 to flip all onscreen windows
+        else
             
-            % Get trial duration.
-            sample(count).trialduration = flip_off - flip_on;
-            clear flip_on flip_off
-            
-            % Save results to file
-            fprintf(outputfile, '%d\t %d\t %d\t %s\t %d\t %d\t %d\n',...
-                prefs.subID, sample(count).group, sample(count).day, sample(count).symbolname, sample(count).block, sample(count).trial, sample(count).drawduration, sample(count).trialduration);
-            
-            % Update counter.
-            count = count + 1;
+            sample(count).drawduration = NaN;
             
         end
         
-        % Add in the mandatory 3 minute break at half-way point (after block 5).
-        if block == 5
-            
-            Screen('FillRect', prefs.w2, prefs.backColor);
-            Screen('Flip', prefs.w2, [], [], [], 0); %0 to flip all onscreen windows
-            
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            Screen('Flip', prefs.w1, [], [], [], 0); %0 to flip all onscreen windows
-            
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            PresentCenteredText(prefs.w1, '3 minute rest', prefs.fontSize, prefs.foreColor, prefs.w1Size);
-            Screen('Flip', prefs.w1);
-            
-            WaitSecs(60*3);
-            
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            PresentCenteredText(prefs.w1, 'Break is over! Ready?', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -200]);
-            PresentCenteredText(prefs.w1, 'Press space bar to proceed.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
-            Screen('Flip', prefs.w1);
-            
-            waitForTrigger2('space');
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            Screen('Flip', prefs.w1);
-            
-            WaitSecs(3);
-            
-        end
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        Screen('FillRect', prefs.w2, prefs.backColor);
+        Screen('FillRect', prefs.w3, prefs.backColor);
+        flip_off = Screen('Flip', prefs.w3,[], [], [], 0); %0 to flip all onscreen windows
         
-        if block == 2 %10
-            
-            Screen('FillRect', prefs.w2, prefs.backColor);
-            Screen('Flip', prefs.w2, [], [], [], 0); %0 to flip all onscreen windows
-            
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            Screen('Flip', prefs.w1, [], [], [], 0); %0 to flip all onscreen windows
-            
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            PresentCenteredText(prefs.w1, 'All done!', prefs.fontSize, prefs.foreColor, prefs.w1Size);
-            Screen('Flip', prefs.w1);
-            
-            waitForTrigger2('space');
-            Screen('FillRect', prefs.w1, prefs.backColor);
-            Screen('Flip', prefs.w1);
-                                
-        end
+        % Get trial duration.
+        sample(count).trialduration = flip_off - flip_on;
+        clear flip_on flip_off
+        
+        % Save results to file
+        fprintf(outputfile, '%d\t %d\t %d\t %s\t %d\t %d\t %d\n',...
+            prefs.subID, sample(count).group, sample(count).day, sample(count).symbolname, sample(count).block, sample(count).trial, sample(count).drawduration, sample(count).trialduration);
+        
+        % Update counter.
+        count = count + 1;
         
     end
+    
+    % Add in the mandatory 3 minute break at half-way point (after block 5).
+    if block == 5
+        
+        Screen('FillRect', prefs.w2, prefs.backColor);
+        Screen('Flip', prefs.w2, [], [], [], 0); %0 to flip all onscreen windows
+        
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        Screen('Flip', prefs.w1, [], [], [], 0); %0 to flip all onscreen windows
+        
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        PresentCenteredText(prefs.w1, '3 minute rest', prefs.fontSize, prefs.foreColor, prefs.w1Size);
+        Screen('Flip', prefs.w1);
+        
+        WaitSecs(60*3);
+        
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        PresentCenteredText(prefs.w1, 'Break is over! Ready?', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -200]);
+        PresentCenteredText(prefs.w1, 'Press space bar to proceed.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
+        Screen('Flip', prefs.w1);
+        
+        waitForTrigger2('space');
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        Screen('Flip', prefs.w1);
+        
+        WaitSecs(3);
+        
+    end
+    
+    if block == 10
+        
+        Screen('FillRect', prefs.w2, prefs.backColor);
+        Screen('Flip', prefs.w2, [], [], [], 0); %0 to flip all onscreen windows
+        
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        Screen('Flip', prefs.w1, [], [], [], 0); %0 to flip all onscreen windows
+        
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        PresentCenteredText(prefs.w1, 'All done!', prefs.fontSize, prefs.foreColor, prefs.w1Size);
+        Screen('Flip', prefs.w1);
+        
+        waitForTrigger2('space');
+        Screen('FillRect', prefs.w1, prefs.backColor);
+        Screen('Flip', prefs.w1);
+        
+    end
+    
+end
 
 % Save static and dynamic stimuli as a mat file.
 save(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), 'sample');
