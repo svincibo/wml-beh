@@ -246,7 +246,7 @@ for block = 1:10
             
         elseif prefs.group == 2
             
-            [prefs] = drawNoInk(prefs);
+            [prefs] = drawNoInk2(prefs);
             
         elseif prefs.group == 3
             
@@ -282,17 +282,9 @@ for block = 1:10
         sample(count).block = block;
         sample(count).trial = trial;
         
-        if prefs.group == 1
+        if prefs.group == 1 || prefs.group == 2
             
-            % Save dynamic stim for yoked participant.
-            sample(count).dynamicStim = prefs.dynamicStim;
-            
-            % Save static stim.
-            sample(count).staticStim = prefs.image;
-            
-            % Write out the static image.
-            imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
-            
+            % Save drawing duration.            
             if max(prefs.time)-min(prefs.time) > 0.01
                 
                 sample(count).drawduration = max(prefs.time)-min(prefs.time);
@@ -302,9 +294,24 @@ for block = 1:10
                 
             end
             
+            % Save dynamic stim for yoked participant.
+            sample(count).dynamicStim = prefs.dynamicStim;
+            
+            % Save static stim.
+            sample(count).staticStim = prefs.image;
+            
+            if prefs.group == 1
+                
+                % Write out the static image for DI participants.
+                imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+                
+            end
+            
         else
             
             sample(count).drawduration = NaN;
+            sample(count).dynamicStim = NaN;
+            sample(count).staticStim = NaN;
             
         end
         
