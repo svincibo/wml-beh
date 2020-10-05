@@ -111,7 +111,6 @@ prefs.s0 = min(Screen('Screens')); % Find primary screen.
 % Screen('TextSize', prefs.w1, 80);
 
 % Hide cursor and orient to the Matlab command window for user input.
-HideCursor([], prefs.w1);
 commandwindow;
 
 % Keyboard setup
@@ -132,6 +131,7 @@ W=prefs.w1Width; % screen width
 H=prefs.w1Height; % screen height
 Screen(prefs.w1,'FillRect',prefs.backColor);
 Screen('Flip', prefs.w1);
+HideCursor([], prefs.w1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up stimuli lists and results file
