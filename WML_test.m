@@ -4,9 +4,6 @@
 % Downloaded on Oct 2, 2020 from : http://www.kehinger.com/PTBexamples.html
 % Modified by Sophia Vinci-Booher in 2020
 
-% Add mask after a 25 ms stim presentation time, no time out for mask, forced-choice response
-% Adjust size presentation of stim so that they are similar in size (see WML_trail for example)
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set up the experiment (don't modify this section)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -111,10 +108,10 @@ if isequal(prefs.s1, prefs.s0)
     prefs.w1Height = prefs.w1Size(4);
     % Dimensions of stimulus presentation area.
     prefs.rectForStim = [prefs.w1Width/2-prefs.scale/2 prefs.w1Height/2-prefs.scale/2 prefs.w1Width/2+prefs.scale/2 prefs.w1Height/2+prefs.scale/2];
-%     [250 5 390 145];
-%     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
-%     prefs.w2Width = prefs.w2Size(3);
-%     prefs.w2Height = prefs.w2Size(4);
+    %     [250 5 390 145];
+    %     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
+    %     prefs.w2Width = prefs.w2Size(3);
+    %     prefs.w2Height = prefs.w2Size(4);
 else
     % Dimensions of primary screen
     prefs.w0Size = get(prefs.s0, 'ScreenSize');
@@ -125,9 +122,9 @@ else
     prefs.xcenter = prefs.w1Width/2; prefs.ycenter = prefs.w1Height/2;
     % Dimensions of stimulus presentation area.
     prefs.rectForStim = [prefs.w0Width+prefs.xcenter-(prefs.scale/2) 50 prefs.w0Width+prefs.xcenter+(prefs.scale/2) 50+prefs.scale]; %
-%     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
-%     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
-%     prefs.w2Width = prefs.w2Size(3); prefs.w2Height = prefs.w2Size(4);
+    %     %[prefs.w0Size(3)+prefs.xcenter-prefs.scale prefs.w1Size(4)-600 prefs.w0Size(3)+prefs.xcenter+prefs.scale prefs.w1Size(4)-300];
+    %     [prefs.w2, prefs.w2Size] = PsychImaging('OpenWindow', prefs.s1, prefs.backColor, prefs.rectForStim);
+    %     prefs.w2Width = prefs.w2Size(3); prefs.w2Height = prefs.w2Size(4);
 end
 
 % Set the text size.
@@ -160,13 +157,13 @@ Screen('Flip', prefs.w1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get the image files for the experiment
-imageFolder = fullfile(rootDir, 'stimuli/typed_symbols_all/');
+td_imageFolder = fullfile(rootDir, 'stimuli/typed_symbols_all/');
 
 % Select the distractor block, so that a participant does not see the same
 % distractor more than once in the experiment and so that the distractors
 % occur randomly across blocks between participants.
-t_imgList = dir(fullfile(imageFolder,'S*.bmp'));
-d_imgList = dir(fullfile(imageFolder,'D*.bmp'));
+t_imgList = dir(fullfile(td_imageFolder,'S*.bmp'));
+d_imgList = dir(fullfile(td_imageFolder,'D*.bmp'));
 if prefs.day == 1
     d_imgList = d_imgList(distractor_list(1:40, prefs.subID));
 elseif prefs.day == 2
@@ -176,11 +173,19 @@ elseif prefs.day == 3
 elseif prefs.day == 4
     d_imgList = d_imgList(distractor_list(121:160, prefs.subID));
 end
-imgList = cat(1, t_imgList, d_imgList);
-imgList = {imgList(:).name};
-nTrials = length(imgList);
+td_imgList = cat(1, t_imgList, d_imgList);
+td_imgList = {td_imgList(:).name};
+nTrials = length(td_imgList);
 
-% Load the text file (opt ynniynional)
+% Get the noise image files for the experiment
+n_imageFolder = fullfile(rootDir, 'stimuli/noise_masks/');
+
+% Select the noise images.
+n_imgList = dir(fullfile(n_imageFolder,'nm*.bmp'));
+n_imgList = n_imgList(randi(size(n_imgList, 1), [1 size(td_imgList, 2)]));
+n_imgList = {n_imgList(:).name};
+
+% Load the text file (optional)
 if strcmp(textFile,'none') == 0
     showTextItem = 1;
     textItems = importdata(textFile);
@@ -215,14 +220,19 @@ end
 for t = randomizedTrials
     
     % Load image
-    file = imgList{t};
-    img = imread(fullfile(imageFolder,file));
-    imageDisplay = Screen('MakeTexture', prefs.w1, img);
+    file = td_imgList{t};
+    img = imread(fullfile(td_imageFolder,file));
+    td_imageDisplay = Screen('MakeTexture', prefs.w1, img);
     
-%     % Calculate image position (center of the screen)
-%     imageSize = size(img);
-%     pos = [(W-imageSize(2))/2 (H-imageSize(1))/2 (W+imageSize(2))/2 (H+imageSize(1))/2];
-
+    % Load noise mask
+    file = n_imgList{t};
+    img = imread(fullfile(n_imageFolder,file));
+    n_imageDisplay = Screen('MakeTexture', prefs.w1, img);
+    
+    %     % Calculate image position (center of the screen)
+    %     imageSize = size(img);
+    %     pos = [(W-imageSize(2))/2 (H-imageSize(1))/2 (W+imageSize(2))/2 (H+imageSize(1))/2];
+    
     % Screen priority
     Priority(MaxPriority(prefs.w1));
     Priority(2);
@@ -230,12 +240,12 @@ for t = randomizedTrials
     % Show fixation cross
     fixationDuration = 0.5; % Length of fixation in seconds
     drawCross(prefs.w1,W,H);
-    tFixation = Screen('Flip', window1);
-
+    tFixation = Screen('Flip', prefs.w1);
+    
     % Blank screen
     Screen(window1, 'FillRect', backgroundColor);
     Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
-
+    
     % Show text item (optional)
     if showTextItem
         % Display text
@@ -243,7 +253,7 @@ for t = randomizedTrials
         textDuration = 2; % How long to show text (in seconds)
         Screen('DrawText', prefs.w1, textString, (W/2-200), (H/2), textColor);
         tTextdisplay = Screen('Flip', prefs.w1);
-
+        
         % Blank screen
         Screen(prefs.w1, 'FillRect', backgroundColor);
         Screen('Flip', prefs.w1, tTextdisplay + textDuration - slack,0);
@@ -254,17 +264,18 @@ for t = randomizedTrials
     
     % Show the images
     Screen(prefs.w1, 'FillRect', backgroundColor);
-    Screen('DrawTexture', prefs.w1, imageDisplay, [], prefs.rectForStim);
+    Screen('DrawTexture', prefs.w1, td_imageDisplay, [], prefs.rectForStim);
     startTime = Screen('Flip', prefs.w1); % Start of trial
     
     % Get keypress response
     rt = 0;
     resp = 0;
-    while GetSecs - startTime < trialTimeout
+    while (GetSecs - startTime) < trialTimeout
+        
         [keyIsDown,secs,keyCode] = KbCheck;
         respTime = GetSecs;
         pressedKeys = find(keyCode);
-                
+        
         % ESC key quits the experiment
         if keyCode(KbName('ESCAPE')) == 1
             clear all
@@ -283,23 +294,33 @@ for t = randomizedTrials
             end
         end
         
+        % Replace symbol with noise mask after 25 ms.
+        if (GetSecs - startTime) <= 0.25
+            
+            % Show noise mask
+            Screen(prefs.w1, 'FillRect', backgroundColor);
+            Screen('DrawTexture', prefs.w1, n_imageDisplay, [], prefs.rectForStim);
+            Screen('Flip', prefs.w1); 
+    
+        end
+        
         % Exit loop once a response is recorded
         if rt > 0
             break;
         end
-
+        
     end
-
+    
     % Blank screen
     Screen(prefs.w1, 'FillRect', prefs.backColor);
     Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
     
     % Save results to file
     fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
-        prefs.subID, imageFolder, t, textString, file, resp, rt);
+        prefs.subID, td_imageFolder, t, textString, file, resp, rt);
     
     % Clear textures
-    Screen(imageDisplay,'Close');
+    Screen(td_imageDisplay,'Close');
     
     % Provide a short break after a certain number of trials
     if mod(t,breakAfterTrials) == 0
@@ -313,7 +334,7 @@ for t = randomizedTrials
             end
         end
     else
-    
+        
         % Pause between trials
         if timeBetweenTrials == 0
             while 1 % Wait for space
@@ -338,17 +359,15 @@ close all
 sca;
 return
 
-%  y
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Subfunctions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Draw a fixation cross (overlapping horizontal and vertical bar)
 function drawCross(window,W,H)
-    barLength = 16; % in pixels
-    barWidth = 2; % in pixels
-    barColor = 0.5; % number from 0 (black) to 1 (white) 
-    Screen('FillRect', window, barColor,[ (W-barLength)/2 (H-barWidth)/2 (W+barLength)/2 (H+barWidth)/2]);
-    Screen('FillRect', window, barColor ,[ (W-barWidth)/2 (H-barLength)/2 (W+barWidth)/2 (H+barLength)/2]);
+barLength = 16; % in pixels
+barWidth = 2; % in pixels
+barColor = 0.5; % number from 0 (black) to 1 (white)
+Screen('FillRect', window, barColor,[ (W-barLength)/2 (H-barWidth)/2 (W+barLength)/2 (H+barWidth)/2]);
+Screen('FillRect', window, barColor ,[ (W-barWidth)/2 (H-barLength)/2 (W+barWidth)/2 (H+barLength)/2]);
 end
