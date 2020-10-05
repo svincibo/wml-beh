@@ -157,22 +157,13 @@ Screen('Flip', prefs.w1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get the image files for the experiment
-td_imageFolder = fullfile(rootDir, 'stimuli/typed_symbols_all/');
+td_imageFolder = fullfile(rootDir, 'stimuli/typed_letters_shapes/');
 
 % Select the distractor block, so that a participant does not see the same
 % distractor more than once in the experiment and so that the distractors
 % occur randomly across blocks between participants.
-t_imgList = dir(fullfile(td_imageFolder,'S*.bmp'));
-d_imgList = dir(fullfile(td_imageFolder,'D*.bmp'));
-if prefs.day == 1
-    d_imgList = d_imgList(distractor_list(1:40, prefs.subID));
-elseif prefs.day == 2
-    d_imgList = d_imgList(distractor_list(41:80, prefs.subID));
-elseif prefs.day == 3
-    d_imgList = d_imgList(distractor_list(81:120, prefs.subID));
-elseif prefs.day == 4
-    d_imgList = d_imgList(distractor_list(121:160, prefs.subID));
-end
+t_imgList = dir(fullfile(td_imageFolder,'letter*.bmp'));
+d_imgList = dir(fullfile(td_imageFolder,'shape*.bmp'));
 td_imgList = cat(1, t_imgList, d_imgList);
 td_imgList = {td_imgList(:).name};
 nTrials = length(td_imgList);
@@ -206,7 +197,7 @@ randomizedTrials = randperm(nTrials);
 
 % Start screen
 Screen('FillRect', prefs.w1, prefs.backColor);
-PresentCenteredText(prefs.w1,'Press the space bar to begin', 90, prefs.foreColor, prefs.w1Size);
+PresentCenteredText(prefs.w1,'Ready? Press the space bar to begin.', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip',prefs.w1)
 % Wait for subject to press spacebar
 while 1

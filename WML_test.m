@@ -206,7 +206,7 @@ randomizedTrials = randperm(nTrials);
 
 % Start screen
 Screen('FillRect', prefs.w1, prefs.backColor);
-PresentCenteredText(prefs.w1,'Press the space bar to begin', 90, prefs.foreColor, prefs.w1Size);
+PresentCenteredText(prefs.w1,'Ready? Press the space bar to begin.', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip',prefs.w1)
 % Wait for subject to press spacebar
 while 1
