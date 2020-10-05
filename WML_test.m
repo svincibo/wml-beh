@@ -330,7 +330,7 @@ for t = randomizedTrials
     end
 end
 
-save(fullfile(rootDir, 'data', ['test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']))
+save(fullfile(saveDir, ['test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']))
 ShowCursor;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
