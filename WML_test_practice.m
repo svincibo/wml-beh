@@ -162,7 +162,7 @@ else
 end
 
 % Set up the output file
-outputfile = fopen([saveDir '/test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
+outputfile = fopen([saveDir '/test_practice_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
 fprintf(outputfile, 'subID\t imageCondition\t trial\t textItem\t imageFile\t response\t RT\n');
 
 % Randomize the trial list

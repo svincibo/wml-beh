@@ -96,7 +96,7 @@ if prefs.group == 3
     prefs.subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
     
     % Import yoked subject's drawing trajectories.
-    load(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
+    load(fullfile(saveDir, ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
     
 end
 
@@ -181,6 +181,22 @@ HideCursor([], prefs.w1);
 commandwindow;
 
 %% Record.
+
+% Start screen
+Screen('FillRect', prefs.w1, prefs.backColor);
+PresentCenteredText(prefs.w1,'Ready? Press the space bar to begin.', 60, prefs.foreColor, prefs.w1Size);
+Screen('Flip',prefs.w1)
+
+% Wait for subject to press spacebar
+while 1
+    [keyIsDown,secs,keyCode] = KbCheck;
+    if keyCode(KbName('space'))==1
+        break
+    end
+end
+
+Screen('FillRect', prefs.w1, prefs.backColor);
+Screen('Flip',prefs.w1)
 
 % Screen
 Screen('FillRect', prefs.w1, prefs.backColor);
@@ -303,15 +319,16 @@ for block = 1:10
             if prefs.group == 1
                 
                 % Write out the static image for DI participants.
-                imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                
+%                 imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+                imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+                                
             end
             
         else
             
             sample(count).drawduration = NaN;
-            sample(count).dynamicStim = NaN;
-            sample(count).staticStim = NaN;
+%             sample(count).dynamicStim = NaN;
+%             sample(count).staticStim = NaN;
             
         end
         
