@@ -46,7 +46,7 @@ clear ch
 
 % Look to see if there are any days for this subject already, if no, set
 % this as day 1. If yes, count how many and set day appropriately.
-if exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
+if exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
     disp('Records suggest that this participant has already completed 4 days of training! This is not possible.');
     ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
     if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
@@ -57,11 +57,11 @@ if exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day4.mat'
         error('Please start over and be sure to enter the correct participant ID.');
     end
     clear ch ch2
-elseif exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
     prefs.day = 4; flag = 0;
-elseif exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
     prefs.day = 3; flag = 0;
-elseif exist(fullfile(saveDir, 'data', ['train_sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
     prefs.day = 2; flag = 0;
 else
     prefs.day = 1; flag = 0;
