@@ -96,7 +96,7 @@ if prefs.group == 3
     prefs.subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
     
     % Import yoked subject's drawing trajectories.
-    load(fullfile(saveDir, ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
+    sub_yoke = load(fullfile(saveDir, ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
     
 end
 
@@ -267,20 +267,24 @@ for block = 1:10
         elseif prefs.group == 3
             
             % Find the appropriate symbol. Loop because sample is struct.
-            for k = 1:size(sample, 2)
+%             for k = 1:size(sample, 2)
                 
-                % Make sure that this instance comes from the same prefs.block as
-                % it was drawn by the DI participant.
-                if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
-                    
-                    idx = k;
-                    
-                end
+                sample_tbl = struct2table(sub_yoke.sample);
+                               
+                idx = find(strcmp(sample_tbl.symbol, prefs.symbol) & sample_tbl.block == block);
+                disp(idx)
+%                 % Make sure that this instance comes from the same prefs.block as
+%                 % it was drawn by the DI participant.
+%                 if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
+%                     
+%                     idx = k;
+%                     
+%                 end
                 
-            end
+%             end
             
             % Display.
-            [prefs] = watchDynamic(prefs, sample(idx).dynamicStim);
+            [prefs] = watchDynamic(prefs, sub_yoke.sample(idx).dynamicStim);
             
         else
             
@@ -327,8 +331,8 @@ for block = 1:10
         else
             
             sample(count).drawduration = NaN;
-%             sample(count).dynamicStim = NaN;
-%             sample(count).staticStim = NaN;
+            sample(count).dynamicStim = NaN;
+            sample(count).staticStim = NaN;
             
         end
         
