@@ -8,7 +8,7 @@
 %% Set up the experiment (don't modify this section)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-sca; clear all; clc;
+sca; clear all; clc; 
 Screen('Preference','SkipSyncTests', 1);
 PsychJavaTrouble;
 rootDir = '~/Desktop/WML/';

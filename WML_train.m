@@ -10,7 +10,7 @@
 %                       GStreamer (For Apple OSX: Runtime v1.8.0, found at:
 %                       <http://gstreamer.freedesktop.org/data/pkg/osx/1.8.0/gstreamer-1.0-1.8.0-x86_64.pkg>)
 
-sca; clear all; clc;
+sca; clear all; clc; tic
 rootDir = '~/Desktop/WML/';
 saveDir = '~/Google Drive/data/';
 
@@ -356,6 +356,9 @@ for block = 1:10
     
     % Add in the mandatory 3 minute break at half-way point (after block 5).
     if block == 5
+        
+        toc
+        disp(num2str(toc-tic));
         
         Screen('FillRect', prefs.w2, prefs.backColor);
         Screen('Flip', prefs.w2, [], [], [], 0); %0 to flip all onscreen windows
