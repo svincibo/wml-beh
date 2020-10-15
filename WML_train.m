@@ -346,7 +346,7 @@ for block = 1:10
         clear flip_on flip_off
         
         % Save results to file
-        fprintf(outputfile, '%d\t %d\t %d\t %s\t %d\t %d\t %d\n',...
+        fprintf(outputfile, '%d\t %d\t %d\t %s\t %d\t %d\t %2.2f\t %2.2f\n',...
             prefs.subID, sample(count).group, sample(count).day, sample(count).symbolname, sample(count).block, sample(count).trial, sample(count).drawduration, sample(count).trialduration);
         
         % Update counter.

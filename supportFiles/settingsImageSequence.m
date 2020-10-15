@@ -23,7 +23,7 @@ textColor = 0;
 % imageFormat = 'bmp';
 
 % How long to wait (in seconds) for subject response before the trial times out
-trialTimeout = 50000;
+trialTimeout = 1.5; %50000;
 
 % How long to pause in between trials (if 0, the experiment will wait for
 % the subject to press a key before every trial)
