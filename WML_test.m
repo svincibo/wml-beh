@@ -12,6 +12,8 @@ sca; clear all; clc;
 Screen('Preference','SkipSyncTests', 1);
 PsychJavaTrouble;
 rootDir = '~/Desktop/WML/';
+t_retry = [];
+
 % saveDir = fullfile(rootDir, 'data');
 
 saveDir = '~/Google Drive/data/';
@@ -176,7 +178,7 @@ end
 
 % Set up the output file
 outputfile = fopen([saveDir '/test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
-fprintf(outputfile, 'subID\t imageCondition\t trial\t textItem\t imageFile\t response\t RT\n');
+fprintf(outputfile, 'subID\t imageCondition\t trial\t imageFile\t response\t RT\n');
 
 % Randomize the trial list
 randomizedTrials = randperm(nTrials);
@@ -197,10 +199,10 @@ while 1
     end
 end
 
-count = 0;
+count = 0; trial = 0;
 % Run experimental trials
 for t = randomizedTrials
-    
+    trial = trial + 1;
     % Load image
     td_file = td_imgList{t};
     img = imread(fullfile(td_imageFolder,td_file));
@@ -307,7 +309,6 @@ for t = randomizedTrials
             % Keep item index to present later.
             count = count + 1;
             t_retry(count) = t;
-            disp(t_retry(count));
             
             % Exit loop.
             break;
@@ -326,8 +327,8 @@ for t = randomizedTrials
     Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
     
     % Save results to file
-    fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
-        prefs.subID, td_imageFolder, t, textString, td_file, resp, rt);
+    fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %f\n',...
+        prefs.subID, td_imageFolder, trial, td_file, resp, rt);
     
     % Clear textures
     Screen(td_imageDisplay,'Close');
@@ -366,152 +367,158 @@ clear t;
 %                 Screen('FillRect', prefs.w1, prefs.backColor);
 %                 PresentCenteredText(prefs.w1,'retry', 60, prefs.foreColor, prefs.w1Size);
 %                 tFeedback = Screen('Flip', prefs.w1);
-%                 
+%
 %                 % Blank screen
 %                 Screen(window1, 'FillRect', backgroundColor);
 %                 Screen('Flip', prefs.w1, tFeedback + feedbackDuration - slack,0);
-                
+
 % If there are items that need to be represented, then represent them here
 % in random order.
-while ~isempty('t_retry')
+if length(t_retry) > 0
+    fprintf(outputfile, 'repeats\n');
     
-    t_retry = Shuffle(t_retry);
-    
-    % Run experimental trials
-    for t = t_retry
+    while length(t_retry) > 0
         
-        % Load image
-        td_file = td_imgList{t};
-        img = imread(fullfile(td_imageFolder,td_file));
-        td_imageDisplay = Screen('MakeTexture', prefs.w1, img);
+        t_retry = Shuffle(t_retry);
         
-        % Load noise mask
-        n_file = n_imgList{t};
-        img = imread(fullfile(n_imageFolder,n_file));
-        n_imageDisplay = Screen('MakeTexture', prefs.w1, img);
-        
-        %     % Calculate image position (center of the screen)
-        %     imageSize = size(img);
-        %     pos = [(W-imageSize(2))/2 (H-imageSize(1))/2 (W+imageSize(2))/2 (H+imageSize(1))/2];
-        
-        % Screen priority
-        Priority(MaxPriority(prefs.w1));
-        Priority(2);
-        
-        % Show fixation cross
-        fixationDuration = 0.5; % Length of fixation in seconds
-        drawCross(prefs.w1,W,H);
-        tFixation = Screen('Flip', prefs.w1);
-        
-        % Blank screen
-        Screen(window1, 'FillRect', backgroundColor);
-        Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
-        
-        % Show the images
-        Screen(prefs.w1, 'FillRect', backgroundColor);
-        Screen('DrawTexture', prefs.w1, td_imageDisplay, [], prefs.rectForStim);
-        startTime = Screen('Flip', prefs.w1); % Start of trial
-        
-        % Get keypress response
-        rt = 0;
-        resp = 0;
-        while (GetSecs - startTime) < trialTimeout
+        % Run experimental trials
+        for t = t_retry
+            trial = trial + 1;
+            % Load image
+            td_file = td_imgList{t};
+            img = imread(fullfile(td_imageFolder,td_file));
+            td_imageDisplay = Screen('MakeTexture', prefs.w1, img);
             
-            [keyIsDown,secs,keyCode] = KbCheck;
-            respTime = GetSecs;
-            pressedKeys = find(keyCode);
+            % Load noise mask
+            n_file = n_imgList{t};
+            img = imread(fullfile(n_imageFolder,n_file));
+            n_imageDisplay = Screen('MakeTexture', prefs.w1, img);
             
-            % ESC key quits the experiment
-            if keyCode(KbName('ESCAPE')) == 1
-                clear all
-                close all
-                sca
-                return;
-            end
+            %     % Calculate image position (center of the screen)
+            %     imageSize = size(img);
+            %     pos = [(W-imageSize(2))/2 (H-imageSize(1))/2 (W+imageSize(2))/2 (H+imageSize(1))/2];
             
-            % Check for response keys
-            if ~isempty(pressedKeys)
-                for i = 1:length(responseKeys)
-                    if KbName(responseKeys{i}) == pressedKeys(1)
-                        resp = responseKeys{i};
-                        rt = respTime - startTime;
-                        % Remove this item from t_retry because we got a response for this item.
-                        t_retry = t_retry(~(t_retry==t));
+            % Screen priority
+            Priority(MaxPriority(prefs.w1));
+            Priority(2);
+            
+            % Show fixation cross
+            fixationDuration = 0.5; % Length of fixation in seconds
+            drawCross(prefs.w1,W,H);
+            tFixation = Screen('Flip', prefs.w1);
+            
+            % Blank screen
+            Screen(window1, 'FillRect', backgroundColor);
+            Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
+            
+            % Show the images
+            Screen(prefs.w1, 'FillRect', backgroundColor);
+            Screen('DrawTexture', prefs.w1, td_imageDisplay, [], prefs.rectForStim);
+            startTime = Screen('Flip', prefs.w1); % Start of trial
+            
+            % Get keypress response
+            rt = 0;
+            resp = 0;
+            while (GetSecs - startTime) < trialTimeout
+                
+                [keyIsDown,secs,keyCode] = KbCheck;
+                respTime = GetSecs;
+                pressedKeys = find(keyCode);
+                
+                % ESC key quits the experiment
+                if keyCode(KbName('ESCAPE')) == 1
+                    clear all
+                    close all
+                    sca
+                    return;
+                end
+                
+                % Check for response keys
+                if ~isempty(pressedKeys)
+                    for i = 1:length(responseKeys)
+                        if KbName(responseKeys{i}) == pressedKeys(1)
+                            resp = responseKeys{i};
+                            rt = respTime - startTime;
+                            % Remove this item from t_retry because we got a response for this item.
+                            t_retry = t_retry(~(t_retry==t));
+                        end
                     end
                 end
-            end
-            
-            % Replace symbol with noise mask after 25 ms.
-            if (GetSecs - startTime) >= .025
                 
-                % Show noise mask
-                Screen(prefs.w1, 'FillRect', backgroundColor);
-                Screen('DrawTexture', prefs.w1, n_imageDisplay, [], prefs.rectForStim);
-                Screen('Flip', prefs.w1);
-                
-            end
-            
-            % If they did not respond within the trialTimeout window, tell them
-            % so and save this symbol to represent later.
-            if (GetSecs - startTime) >= trialTimeout && rt==0
-                
-                % Show feedback
-                feedbackDuration = 2; % Length of fixation in seconds
-                Screen('FillRect', prefs.w1, prefs.backColor);
-                PresentCenteredText(prefs.w1,'Too slow! Try again.', 60, prefs.foreColor, prefs.w1Size);
-                tFeedback = Screen('Flip', prefs.w1);
-                
-                % Blank screen
-                Screen(window1, 'FillRect', backgroundColor);
-                Screen('Flip', prefs.w1, tFeedback + feedbackDuration - slack,0);
-                
-                % Record that they did not respond on this trial.
-                resp = 'NR';
-                rt = NaN;
-                %
-                %             % Keep item index to present later.
-                %             t_retry(end+1) = t;
-                
-                % Exit loop.
-                break;
-                
-            end
-            
-            % Exit loop once a response is recorded
-            if rt > 0
-                break;
-            end
-            
-        end
-        
-        % Blank screen
-        Screen(prefs.w1, 'FillRect', prefs.backColor);
-        Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
-        
-        % Save results to file
-        fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
-            prefs.subID, td_imageFolder, t, textString, td_file, resp, rt);
-        
-        % Clear textures
-        Screen(td_imageDisplay,'Close');
-        
-        % Pause between trials
-        if timeBetweenTrials == 0
-            while 1 % Wait for space
-                [keyIsDown,secs,keyCode] = KbCheck;
-                if keyCode(KbName('space'))==1
-                    break
+                % Replace symbol with noise mask after 25 ms.
+                if (GetSecs - startTime) >= .025
+                    
+                    % Show noise mask
+                    Screen(prefs.w1, 'FillRect', backgroundColor);
+                    Screen('DrawTexture', prefs.w1, n_imageDisplay, [], prefs.rectForStim);
+                    Screen('Flip', prefs.w1);
+                    
                 end
+                
+                % If they did not respond within the trialTimeout window, tell them
+                % so and save this symbol to represent later.
+                if (GetSecs - startTime) >= trialTimeout && rt==0
+                    
+                    % Show feedback
+                    feedbackDuration = 2; % Length of fixation in seconds
+                    Screen('FillRect', prefs.w1, prefs.backColor);
+                    PresentCenteredText(prefs.w1,'Too slow! Try again.', 60, prefs.foreColor, prefs.w1Size);
+                    tFeedback = Screen('Flip', prefs.w1);
+                    
+                    % Blank screen
+                    Screen(window1, 'FillRect', backgroundColor);
+                    Screen('Flip', prefs.w1, tFeedback + feedbackDuration - slack,0);
+                    
+                    % Record that they did not respond on this trial.
+                    resp = 'NR';
+                    rt = NaN;
+                    %
+                    %             % Keep item index to present later.
+                    %             t_retry(end+1) = t;
+                    
+                    % Exit loop.
+                    break;
+                    
+                end
+                
+                % Exit loop once a response is recorded
+                if rt > 0
+                    break;
+                end
+                
             end
-        else
-            WaitSecs(timeBetweenTrials);
+            
+            % Blank screen
+            Screen(prefs.w1, 'FillRect', prefs.backColor);
+            Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
+            
+            % Save results to file
+            fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
+                prefs.subID, td_imageFolder, t, textString, td_file, resp, rt);
+            
+            % Clear textures
+            Screen(td_imageDisplay,'Close');
+            
+            % Pause between trials
+            if timeBetweenTrials == 0
+                while 1 % Wait for space
+                    [keyIsDown,secs,keyCode] = KbCheck;
+                    if keyCode(KbName('space'))==1
+                        break
+                    end
+                end
+            else
+                WaitSecs(timeBetweenTrials);
+            end
         end
+        
+        if length(t_retry) == 0
+            break;
+        end
+        
     end
-
 end
-
 save(fullfile(saveDir, ['test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']))
-
 Screen('FillRect', prefs.w1, prefs.backColor);
 PresentCenteredText(prefs.w1, 'All done!', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip', prefs.w1);
@@ -519,7 +526,6 @@ Screen('Flip', prefs.w1);
 waitForTrigger2('space');
 Screen('FillRect', prefs.w1, prefs.backColor);
 Screen('Flip', prefs.w1);
-
 ShowCursor;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -528,7 +534,7 @@ ShowCursor;
 RestrictKeysForKbCheck([]);
 fclose(outputfile);
 Screen(window1,'Close');
-close all
+close all; clc;
 sca;
 return
 
