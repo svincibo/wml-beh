@@ -374,7 +374,7 @@ for block = 1:10
         
         Screen('FillRect', prefs.w1, prefs.backColor);
         PresentCenteredText(prefs.w1, 'Break is over! Ready?', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -200]);
-        PresentCenteredText(prefs.w1, 'Press space bar to proceed.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
+        PresentCenteredText(prefs.w1, 'Please alert the research assistant.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
         Screen('Flip', prefs.w1);
         
         waitForTrigger2('space');
