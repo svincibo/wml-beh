@@ -376,7 +376,8 @@ for block = 1:10
         Screen('FillRect', prefs.w1, prefs.backColor);
         PresentCenteredText(prefs.w1, '3 minute rest', prefs.fontSize, prefs.foreColor, prefs.w1Size);
         Screen('Flip', prefs.w1);
-        
+        soundsc(beep_y,beep_Fs);
+
         WaitSecs(60*3);
         
         Screen('FillRect', prefs.w1, prefs.backColor);
