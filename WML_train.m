@@ -11,11 +11,11 @@
 %                       <http://gstreamer.freedesktop.org/data/pkg/osx/1.8.0/gstreamer-1.0-1.8.0-x86_64.pkg>)
 
 sca; clear all; clc; tic
-rootDir = '~/Desktop/WML/';
+localDir = '~/Desktop/WML/';
 saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
-addpath(genpath(fullfile(rootDir, 'supportFiles')));
+addpath(genpath(fullfile(localDir, 'supportFiles')));
 
 % Set preferences for the experiment.
 PsychJavaTrouble;
@@ -31,7 +31,7 @@ commandwindow;
 prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101): ', 's')));%'101';
 
 % Load in the mapping between the subID and training group.
-load(fullfile(rootDir, 'supportFiles/WML_subID_mappings.mat'));
+load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 
 % Set group training variables.
 prefs.group = training_group(find(subID == prefs.subID));
@@ -55,6 +55,8 @@ if exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day4.mat']), 'fil
         flag = 1;
     elseif strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
         error('Please start over and be sure to enter the correct participant ID.');
+    else
+        error('Your response must be either yes or no. Please start over.');
     end
     clear ch ch2
 elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
@@ -78,6 +80,8 @@ if flag == 0
             prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
         elseif strcmp(ch2, 'no') || strcmp(ch2, 'NO') || strcmp(ch2, 'n') || strcmp(ch2, 'N')
             error('Please start over and be sure to enter the correct participant ID.');
+        else
+            error('Your response must be either yes or no. Please start over.');
         end
     else
         disp('..............starting.............');
@@ -86,6 +90,9 @@ if flag == 0
     
 end
 clear flag
+
+% Import audio for alert.
+[beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
 
 % Import yoked stimuli if this is a Watch Dynamic participant. The second
 % column of yoke is the WD participant while the first column of yoke is
@@ -184,7 +191,7 @@ commandwindow;
 
 % Start screen
 Screen('FillRect', prefs.w1, prefs.backColor);
-PresentCenteredText(prefs.w1,'Ready? Press the space bar to begin.', 60, prefs.foreColor, prefs.w1Size);
+PresentCenteredText(prefs.w1,'Ready?', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip',prefs.w1)
 
 % Wait for subject to press spacebar
@@ -205,7 +212,7 @@ Screen('FillRect', prefs.w3, prefs.backColor);
 Screen('Flip', prefs.w3, [], [], [], 0); %0 to flip all onscreen windows
 
 % Read in target symbols.
-tsymbol_dir = dir(fullfile(rootDir, 'stimuli', 'typed_symbols_targets'));
+tsymbol_dir = dir(fullfile(localDir, 'stimuli', 'typed_symbols_targets'));
 
 % Remove the '.' and '..' files.
 tsymbol_dir = tsymbol_dir(arrayfun(@(x) x.name(1), tsymbol_dir) ~= '.');
@@ -324,7 +331,7 @@ for block = 1:10
                 
                 % Write out the static image for DI participants.
 %                 imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+                imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name]));
                                 
             end
             
@@ -374,8 +381,9 @@ for block = 1:10
         
         Screen('FillRect', prefs.w1, prefs.backColor);
         PresentCenteredText(prefs.w1, 'Break is over! Ready?', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -200]);
-        PresentCenteredText(prefs.w1, 'Please alert the research assistant.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
+%         PresentCenteredText(prefs.w1, 'Please alert the research assistant.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
         Screen('Flip', prefs.w1);
+        soundsc(beep_y,beep_Fs);
         
         waitForTrigger2('space');
         Screen('FillRect', prefs.w1, prefs.backColor);
@@ -396,6 +404,7 @@ for block = 1:10
         Screen('FillRect', prefs.w1, prefs.backColor);
         PresentCenteredText(prefs.w1, 'All done!', prefs.fontSize, prefs.foreColor, prefs.w1Size);
         Screen('Flip', prefs.w1);
+        soundsc(beep_y, beep_Fs);
         
         waitForTrigger2('space');
         Screen('FillRect', prefs.w1, prefs.backColor);
@@ -407,6 +416,11 @@ end
 
 % Save static and dynamic stimuli as a mat file.
 save(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), 'sample');
+
+% Backup cloud storage to local device.
+copyfile(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
 
 %% Close all.
 clear PsychImaging;

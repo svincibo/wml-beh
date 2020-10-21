@@ -1,3 +1,4 @@
+
 % WML_test.m
 
 % Originally written by Krista Ehinger, December 2012
@@ -11,7 +12,7 @@
 sca; clear all; clc;
 Screen('Preference','SkipSyncTests', 1);
 PsychJavaTrouble;
-rootDir = '~/Desktop/WML/';
+localDir = '~/Desktop/WML/';
 t_retry = [];
 
 % saveDir = fullfile(rootDir, 'data');
@@ -19,7 +20,7 @@ t_retry = [];
 saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
-addpath(genpath(fullfile(rootDir, 'supportFiles')));
+addpath(genpath(fullfile(localDir, 'supportFiles')));
 
 settingsImageSequence; % Load all the settings from the file
 rand('state', sum(100*clock)); % Initialize the random number generator
@@ -28,7 +29,7 @@ rand('state', sum(100*clock)); % Initialize the random number generator
 prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101): ', 's')));%'101';
 
 % Load in the mapping between the subID and training group.
-load(fullfile(rootDir, 'supportFiles/WML_subID_mappings.mat'));
+load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 
 % Set group training variables.
 prefs.group = training_group(find(subID == prefs.subID));
@@ -52,6 +53,8 @@ if exist(fullfile(saveDir, ['test_sub' num2str(prefs.subID) '_day4.mat']), 'file
         flag = 1;
     elseif strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
         error('Please start over and be sure to enter the correct participant ID.');
+    else
+        error('Your response must be either yes or no. Please start over.');
     end
     clear ch ch2
 elseif exist(fullfile(saveDir, ['test_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
@@ -75,6 +78,8 @@ if flag == 0
             prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
         elseif strcmp(ch2, 'no') || strcmp(ch2, 'NO') || strcmp(ch2, 'n') || strcmp(ch2, 'N')
             error('Please start over and be sure to enter the correct participant ID.');
+        else
+            error('Your response must be either yes or no. Please start over.');
         end
     else
         disp('..............starting.............');
@@ -140,7 +145,7 @@ HideCursor([], prefs.w1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get the image files for the experiment
-td_imageFolder = fullfile(rootDir, 'stimuli/typed_symbols_all/');
+td_imageFolder = fullfile(localDir, 'stimuli/typed_symbols_all/');
 
 % Select the distractor block, so that a participant does not see the same
 % distractor more than once in the experiment and so that the distractors
@@ -161,7 +166,7 @@ td_imgList = {td_imgList(:).name};
 nTrials = length(td_imgList);
 
 % Get the noise image files for the experiment
-n_imageFolder = fullfile(rootDir, 'stimuli/noise_masks/');
+n_imageFolder = fullfile(localDir, 'stimuli/noise_masks/');
 
 % Select the noise images.
 n_imgList = dir(fullfile(n_imageFolder,'nm*.bmp'));
@@ -527,6 +532,10 @@ waitForTrigger2('space');
 Screen('FillRect', prefs.w1, prefs.backColor);
 Screen('Flip', prefs.w1);
 ShowCursor;
+
+% Backup cloud storage to local device.
+copyfile(fullfile(saveDir, ['test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, ['test_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt']), fullfile(localDir, 'data'))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% End the experiment (don't change anything in this section)
