@@ -1,3 +1,5 @@
+
+
 % WML_train.m
 
 % Written by Sophia Vinci-Booher
@@ -46,7 +48,7 @@ clear ch
 
 % Look to see if there are any days for this subject already, if no, set
 % this as day 1. If yes, count how many and set day appropriately.
-if exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
+if exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day4.mat']), 'file') == 2
     disp('Records suggest that this participant has already completed 4 days of training! This is not possible.');
     ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
     if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
@@ -59,16 +61,17 @@ if exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day4.mat']), 'fil
         error('Your response must be either yes or no. Please start over.');
     end
     clear ch ch2
-elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day3.mat']), 'file') == 2
     prefs.day = 4; flag = 0;
-elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day2.mat']), 'file') == 2
     prefs.day = 3; flag = 0;
-elseif exist(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day1.mat']), 'file') == 2
     prefs.day = 2; flag = 0;
 else
     prefs.day = 1; flag = 0;
 end
 
+issueflag = 0;
 if flag == 0
     
     disp(['Records indicate that this is Day ' num2str(prefs.day) ' of training for this participant']);
@@ -78,6 +81,7 @@ if flag == 0
         if strcmp(ch2, 'yes') || strcmp(ch2, 'YES') || strcmp(ch2, 'y') || strcmp(ch2, 'Y')
             disp('If you are sure that you have entered the participant ID correctly,');
             prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
+            issueflag = 1;
         elseif strcmp(ch2, 'no') || strcmp(ch2, 'NO') || strcmp(ch2, 'n') || strcmp(ch2, 'N')
             error('Please start over and be sure to enter the correct participant ID.');
         else
@@ -102,9 +106,13 @@ if prefs.group == 3
     % Get yoked subID.
     prefs.subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
     
-    % Import yoked subject's drawing trajectories.
-    sub_yoke = load(fullfile(saveDir, ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
-    
+    % Import yoked subject's drawing trajectories. Account for change
+    % in file naming scheme earlly on.
+    if (prefs.subID_DI == 11 || prefs.subID_DI == 14 || prefs.subID_DI == 16)
+        sub_yoke = load(fullfile(saveDir, ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
+    else
+        sub_yoke = load(fullfile(saveDir, ['sub' num2str(prefs.subID_DI) '_train_day' num2str(prefs.day) '.mat']));
+    end
 end
 
 % % Import previous samples from subject if they exist. This is for the case
@@ -180,7 +188,11 @@ end
 Screen('TextSize', prefs.w1, 80);
 
 % Set up the output file
-outputfile = fopen([saveDir '/train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
+if issueflag
+    outputfile = fopen([saveDir '/sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '_' datestr(now,'mm-dd-yyyy_HH-MM') '.txt'],'a');
+else
+    outputfile = fopen([saveDir '/sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '.txt'],'a');
+end
 fprintf(outputfile, 'subID\t group\t day\t symbolname\t block\t trial\t drawduration\t trialduration\n');
 
 % Hide cursor and orient to the Matlab command window for user input.
@@ -229,7 +241,7 @@ for block = 1:10
     s = randperm(40);
     
     for trial = 1:40
-         
+        
         [keyIsDown,secs,keyCode] = KbCheck;
         pressedKeys = find(keyCode);
         
@@ -274,21 +286,21 @@ for block = 1:10
         elseif prefs.group == 3
             
             % Find the appropriate symbol. Loop because sample is struct.
-%             for k = 1:size(sample, 2)
-                
-                sample_tbl = struct2table(sub_yoke.sample);
-                               
-                idx = find(strcmp(sample_tbl.symbol, prefs.symbol) & sample_tbl.block == block);
-                disp(idx)
-%                 % Make sure that this instance comes from the same prefs.block as
-%                 % it was drawn by the DI participant.
-%                 if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
-%                     
-%                     idx = k;
-%                     
-%                 end
-                
-%             end
+            %             for k = 1:size(sample, 2)
+            
+            sample_tbl = struct2table(sub_yoke.sample);
+            
+            idx = find(strcmp(sample_tbl.symbol, prefs.symbol) & sample_tbl.block == block);
+            disp(idx)
+            %                 % Make sure that this instance comes from the same prefs.block as
+            %                 % it was drawn by the DI participant.
+            %                 if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
+            %
+            %                     idx = k;
+            %
+            %                 end
+            
+            %             end
             
             % Display.
             [prefs] = watchDynamic(prefs, sub_yoke.sample(idx).dynamicStim);
@@ -311,7 +323,7 @@ for block = 1:10
         
         if prefs.group == 1 || prefs.group == 2
             
-            % Save drawing duration.            
+            % Save drawing duration.
             if max(prefs.time)-min(prefs.time) > 0.01
                 
                 sample(count).drawduration = max(prefs.time)-min(prefs.time);
@@ -330,9 +342,12 @@ for block = 1:10
             if prefs.group == 1
                 
                 % Write out the static image for DI participants.
-%                 imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                                
+                %                 imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+                if issueflag
+                    imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name '_' datestr(now,'mm-dd-yyyy_HH-MM')]));
+                else
+                    imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name]));
+                end
             end
             
         else
@@ -377,12 +392,12 @@ for block = 1:10
         PresentCenteredText(prefs.w1, '3 minute rest', prefs.fontSize, prefs.foreColor, prefs.w1Size);
         Screen('Flip', prefs.w1);
         soundsc(beep_y,beep_Fs);
-
+        
         WaitSecs(60*3);
         
         Screen('FillRect', prefs.w1, prefs.backColor);
         PresentCenteredText(prefs.w1, 'Break is over! Ready?', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -200]);
-%         PresentCenteredText(prefs.w1, 'Please alert the research assistant.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
+        %         PresentCenteredText(prefs.w1, 'Please alert the research assistant.', prefs.fontSize, prefs.foreColor, prefs.w1Size+[0 0 0 -20]);
         Screen('Flip', prefs.w1);
         soundsc(beep_y,beep_Fs);
         
@@ -416,11 +431,15 @@ for block = 1:10
 end
 
 % Save static and dynamic stimuli as a mat file.
-save(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), 'sample');
+if issueflag
+    save(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '_' datestr(now,'mm-dd-yyyy_HH-MM') '.mat']), 'sample');
+else
+    save(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '.mat']), 'sample');
+end
 
 % Backup cloud storage to local device.
-copyfile(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), fullfile(localDir, 'data'))
-copyfile(fullfile(saveDir, ['train_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
 copyfile(fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
 
 %% Close all.

@@ -1,3 +1,4 @@
+
 % WML_test.m
 
 % Originally written by Krista Ehinger, December 2012
@@ -42,7 +43,7 @@ clear ch
 
 % Look to see if there are any days for this subject already, if no, set
 % this as day 1. If yes, count how many and set day appropriately.
-if exist(fullfile(saveDir, ['test__practice_sub' num2str(prefs.subID) '_day4.mat']), 'file') == 2
+if exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day4.mat']), 'file') == 2
     disp('Records suggest that this participant has already completed 4 days! This is not possible.');
     ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
     if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
@@ -55,16 +56,17 @@ if exist(fullfile(saveDir, ['test__practice_sub' num2str(prefs.subID) '_day4.mat
         error('Your response must be either yes or no. Please start over.');
     end
     clear ch ch2
-elseif exist(fullfile(saveDir, ['test_practice_sub' num2str(prefs.subID) '_day3.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day3.mat']), 'file') == 2
     prefs.day = 4; flag = 0;
-elseif exist(fullfile(saveDir, ['test_practice_sub' num2str(prefs.subID) '_day2.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day2.mat']), 'file') == 2
     prefs.day = 3; flag = 0;
-elseif exist(fullfile(saveDir, ['test_practice_sub' num2str(prefs.subID) '_day1.mat']), 'file') == 2
+elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day1.mat']), 'file') == 2
     prefs.day = 2; flag = 0;
 else
     prefs.day = 1; flag = 0;
 end
 
+issueflag = 0;
 if flag == 0
     
     disp(['Records indicate that this is Day ' num2str(prefs.day) ' for this participant']);
@@ -74,6 +76,7 @@ if flag == 0
         if strcmp(ch2, 'yes') || strcmp(ch2, 'YES') || strcmp(ch2, 'y') || strcmp(ch2, 'Y')
             disp('If you are sure that you have entered the participant ID correctly,');
             prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
+            issueflag = 1;
         elseif strcmp(ch2, 'no') || strcmp(ch2, 'NO') || strcmp(ch2, 'n') || strcmp(ch2, 'N')
             error('Please start over and be sure to enter the correct participant ID.');
         else
@@ -167,7 +170,11 @@ else
 end
 
 % Set up the output file
-outputfile = fopen([saveDir '/test_practice_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt'],'a');
+if issueflag
+    outputfile = fopen([saveDir '/sub' num2str(prefs.subID) '_test_practice_day' num2str(prefs.day) '_' datestr(now,'mm-dd-yyyy_HH-MM') '.txt'],'a');
+else
+    outputfile = fopen([saveDir '/sub' num2str(prefs.subID) '_test_practice_day' num2str(prefs.day) '.txt'],'a');
+end
 fprintf(outputfile, 'subID\t imageCondition\t trial\t imageFile\t response\t RT\n');
 
 % Randomize the trial list
@@ -509,7 +516,11 @@ if length(t_retry) > 0
     end
 end
 
-save(fullfile(saveDir, ['test_practice_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']))
+if issueflag
+    save(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day' num2str(prefs.day) '_' datestr(now,'mm-dd-yyyy_HH-MM') '.mat']))
+else
+    save(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day' num2str(prefs.day) '.mat']))
+end
 Screen('FillRect', prefs.w1, prefs.backColor);
 PresentCenteredText(prefs.w1, 'All done!', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip', prefs.w1);
@@ -520,8 +531,8 @@ Screen('Flip', prefs.w1);
 ShowCursor;
 
 % Backup cloud storage to local device.
-copyfile(fullfile(saveDir, ['test_practice_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.mat']), fullfile(localDir, 'data'))
-copyfile(fullfile(saveDir, ['test_practice_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '.txt']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_practice_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% End the experiment (don't change anything in this section)
