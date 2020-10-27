@@ -19,6 +19,9 @@ t_retry = [];
 
 saveDir = '~/Google Drive/data/';
 
+% Import audio for alert.
+[beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
+
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
 
@@ -538,6 +541,7 @@ end
 Screen('FillRect', prefs.w1, prefs.backColor);
 PresentCenteredText(prefs.w1, 'All done!', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip', prefs.w1);
+soundsc(beep_y, beep_Fs);
 
 waitForTrigger2('space');
 Screen('FillRect', prefs.w1, prefs.backColor);

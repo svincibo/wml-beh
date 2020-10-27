@@ -16,6 +16,9 @@ localDir = '~/Desktop/WML/';
 t_retry = [];
 % saveDir = fullfile(rootDir, 'data');
 
+% Import audio for alert.
+[beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
+
 saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
@@ -524,6 +527,7 @@ end
 Screen('FillRect', prefs.w1, prefs.backColor);
 PresentCenteredText(prefs.w1, 'All done!', 60, prefs.foreColor, prefs.w1Size);
 Screen('Flip', prefs.w1);
+soundsc(beep_y, beep_Fs);
 
 waitForTrigger2('space');
 Screen('FillRect', prefs.w1, prefs.backColor);
