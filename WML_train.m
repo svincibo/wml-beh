@@ -12,13 +12,14 @@
 %                       GStreamer (For Apple OSX: Runtime v1.8.0, found at:
 %                       <http://gstreamer.freedesktop.org/data/pkg/osx/1.8.0/gstreamer-1.0-1.8.0-x86_64.pkg>)
 
+addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
+
 sca; clear all; clc; tic
 localDir = '~/Desktop/WML/';
 saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
-addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 
 % Set preferences for the experiment.
 PsychJavaTrouble;

@@ -9,6 +9,8 @@
 %% Set up the experiment (don't modify this section)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
+
 sca; clear all; clc;
 Screen('Preference','SkipSyncTests', 1);
 PsychJavaTrouble;
@@ -18,7 +20,6 @@ t_retry = [];
 
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
-addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 
 % Import audio for alert.
 [beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
