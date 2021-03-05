@@ -18,6 +18,7 @@ saveDir = '~/Google Drive/data/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
+addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 
 % Set preferences for the experiment.
 PsychJavaTrouble;

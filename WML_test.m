@@ -17,13 +17,13 @@ t_retry = [];
 
 % saveDir = fullfile(rootDir, 'data');
 
+% Add location of support files to path.
+addpath(genpath(fullfile(localDir, 'supportFiles')));
+addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 saveDir = '~/Google Drive/data/';
 
 % Import audio for alert.
 [beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
-
-% Add location of support files to path.
-addpath(genpath(fullfile(localDir, 'supportFiles')));
 
 settingsImageSequence; % Load all the settings from the file
 rand('state', sum(100*clock)); % Initialize the random number generator
