@@ -1,5 +1,3 @@
-
-
 % WML_train.m
 
 % Written by Sophia Vinci-Booher
@@ -14,9 +12,9 @@
 
 addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 
-sca; clear all; clc; tic
-localDir = '~/Desktop/WML/';
-saveDir = '~/Google Drive/data/';
+sca; clear all; clc; tic;
+localDir = '~/Desktop/wml-beh/';
+saveDir = '~/Google Drive/data-beh/';
 
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
@@ -38,11 +36,9 @@ prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101)
 load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 
 % Set group training variables.
-prefs.group = training_group(find(subID == prefs.subID));
-prefs.group_label = training_group_labels{prefs.group};
+prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
-disp(['You have indicated that this is participant ' num2str(prefs.subID) '. This is a ' prefs.group_label ' participant.']);
-ch = input('Is this information correct [y, n]? ', 's');
+ch = input(['You have indicated that this is participant ' num2str(prefs.subID) '. Is this information correct [y, n]? '], 's');
 if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
     error('Please start over and be sure to enter the correct participant ID.');
 end
@@ -99,32 +95,6 @@ clear flag
 
 % Import audio for alert.
 [beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
-
-% Import yoked stimuli if this is a Watch Dynamic participant. The second
-% column of yoke is the WD participant while the first column of yoke is
-% the DI participant.
-if prefs.group == 3
-    
-    % Get yoked subID.
-    prefs.subID_DI = yoke(find(yoke(:, 2) == prefs.subID), 1);
-    
-    % Import yoked subject's drawing trajectories. Account for change
-    % in file naming scheme earlly on.
-    if (prefs.subID_DI == 11 || prefs.subID_DI == 14 || prefs.subID_DI == 16)
-        sub_yoke = load(fullfile(saveDir, ['train_sub' num2str(prefs.subID_DI) '_day' num2str(prefs.day) '.mat']));
-    else
-        sub_yoke = load(fullfile(saveDir, ['sub' num2str(prefs.subID_DI) '_train_day' num2str(prefs.day) '.mat']));
-    end
-end
-
-% % Import previous samples from subject if they exist. This is for the case
-% % where there is a glitch or a power-outage. This will allow the training
-% % to pick back up where it left off.
-% if exist(fullfile([pwd '/visualStim/'], [prefs.subID '.mat']), 'file') == 2
-%     load(['visualStim/' prefs.subID '.mat'])
-% else
-% sample.subID = prefs.subID;
-% end
 
 %%%%%%%%%%%%%%%%%%%%% Parameters: DO NOT CHANGE. %%%%%%%%%%%%%%%%%%%%%%%%
 prefs.lengthEvents = 4; % This is the number of seconds you'll have for each stimulus.
@@ -198,7 +168,7 @@ end
 fprintf(outputfile, 'subID\t group\t day\t symbolname\t block\t trial\t drawduration\t trialduration\n');
 
 % Hide cursor and orient to the Matlab command window for user input.
-HideCursor([], prefs.w1);
+% HideCursor([], prefs.w1);
 commandwindow;
 
 %% Record.
@@ -226,7 +196,13 @@ Screen('FillRect', prefs.w3, prefs.backColor);
 Screen('Flip', prefs.w3, [], [], [], 0); %0 to flip all onscreen windows
 
 % Read in target symbols.
-tsymbol_dir = dir(fullfile(localDir, 'stimuli', 'typed_symbols_targets'));
+if prefs.group == 1
+    tsymbol_dir = dir(fullfile(localDir, 'stimuli', 'typed_symbols_all_group1/S*'));
+elseif prefs.group == 2
+    tsymbol_dir = dir(fullfile(localDir, 'stimuli', 'typed_symbols_all_group2/S*'));
+elseif prefs.group == 3
+    tsymbol_dir = dir(fullfile(localDir, 'stimuli', 'typed_symbols_all_group3/S*'));
+end
 
 % Remove the '.' and '..' files.
 tsymbol_dir = tsymbol_dir(arrayfun(@(x) x.name(1), tsymbol_dir) ~= '.');
@@ -276,45 +252,10 @@ for block = 1:10
         % Move mouse to projector
         SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2))
         
-        if prefs.group == 1
-            
-            % Get and display drawing input.
-            [prefs] = drawInk2(prefs);
-            
-        elseif prefs.group == 2
-            
-            [prefs] = drawNoInk2(prefs);
-            
-        elseif prefs.group == 3
-            
-            % Find the appropriate symbol. Loop because sample is struct.
-            %             for k = 1:size(sample, 2)
-            
-            sample_tbl = struct2table(sub_yoke.sample);
-            
-            idx = find(strcmp(sample_tbl.symbol, prefs.symbol) & sample_tbl.block == block);
-            disp(idx)
-            %                 % Make sure that this instance comes from the same prefs.block as
-            %                 % it was drawn by the DI participant.
-            %                 if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
-            %
-            %                     idx = k;
-            %
-            %                 end
-            
-            %             end
-            
-            % Display.
-            [prefs] = watchDynamic(prefs, sub_yoke.sample(idx).dynamicStim);
-            
-        else
-            
-            error('Training group must be 1, 2, or 3.');
-            
-        end
+        % Get and display drawing input.
+        [prefs] = drawInk2_noboundarybox(prefs);
         
-        % Append the sample from this round to the
-        % end of the sample struct.
+        % Append the sample from this round to the end of the sample struct.
         sample(count).subID = prefs.subID;
         sample(count).group = prefs.group;
         sample(count).day = prefs.day;
@@ -322,42 +263,31 @@ for block = 1:10
         sample(count).symbolname = prefs.symbol_name;
         sample(count).block = block;
         sample(count).trial = trial;
-        
-        if prefs.group == 1 || prefs.group == 2
+           
+        % Save drawing duration.
+        if max(prefs.time)-min(prefs.time) > 0.01
             
-            % Save drawing duration.
-            if max(prefs.time)-min(prefs.time) > 0.01
-                
-                sample(count).drawduration = max(prefs.time)-min(prefs.time);
-                
-            else
-                sample(count).drawduration = NaN;
-                
-            end
-            
-            % Save dynamic stim for yoked participant.
-            sample(count).dynamicStim = prefs.dynamicStim;
-            
-            % Save static stim.
-            sample(count).staticStim = prefs.image;
-            
-            if prefs.group == 1
-                
-                % Write out the static image for DI participants.
-                %                 imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                if issueflag
-                    imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name '_' datestr(now,'mm-dd-yyyy_HH-MM')]));
-                else
-                    imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name]));
-                end
-            end
+            sample(count).drawduration = max(prefs.time)-min(prefs.time);
             
         else
-            
             sample(count).drawduration = NaN;
-            sample(count).dynamicStim = NaN;
-            sample(count).staticStim = NaN;
             
+        end
+        
+        % Save dynamic stim for yoked participant.
+        sample(count).dynamicStim = prefs.dynamicStim;
+        
+        % Save static stim.
+        sample(count).staticStim = prefs.image;
+           
+        % Write out the static image for DI participants.
+        %                 imwrite(prefs.image, fullfile(rootDir, 'visualStim', ['sub' num2str(prefs.subID) '_trial' num2str(trial) '_' prefs.symbol_name]));
+        if issueflag
+            imwrite(prefs.image, fullfile(saveDir, 'static_images', ['H' prefs.symbol_name(1:end-4) '_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_block' num2str(block) ...
+                '_trial' num2str(trial) '_' datestr(now,'mm-dd-yyyy_HH-MM') '.bmp']));
+        else
+            imwrite(prefs.image, fullfile(saveDir, 'static_images', ['H' prefs.symbol_name(1:end-4) '_sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_block' num2str(block) ...
+                '_trial' num2str(trial) '.bmp']));
         end
         
         Screen('FillRect', prefs.w1, prefs.backColor);
@@ -442,9 +372,8 @@ end
 % Backup cloud storage to local device.
 copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
 copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
-if prefs.group == 1
-    copyfile(fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
-end
+
+copyfile(fullfile(saveDir, 'static_images', ['*sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
 
 %% Close all.
 clear PsychImaging;

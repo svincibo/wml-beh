@@ -129,7 +129,7 @@ end
 %%%%%%%%%%%%%%%%%%%%% Parameters: DO NOT CHANGE. %%%%%%%%%%%%%%%%%%%%%%%%
 prefs.lengthEvents = 4; % This is the number of seconds you'll have for each stimulus.
 % prefs.scale = 300; % You can increase the size of the box by increasing this number.
-prefs.penWidth = 2.5; % You can increase the thickness of the pen-tip by increasing this number, but there's a limit to the thickness... around 10 maybe.
+prefs.penWidth = 3; % You can increase the thickness of the pen-tip by increasing this number, but there's a limit to the thickness... around 10 maybe.
 prefs.backColor = [255 255 255];   % (0 0 0) is black, (255 255 255) is white
 prefs.foreColor = [0 0 0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -378,8 +378,8 @@ end
 % end
 
 % Backup cloud storage to local device.
-copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
-copyfile(fullfile(saveDir, ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, 'handwritten', ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
+copyfile(fullfile(saveDir, 'handwritten', ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
 if prefs.group == 1
     copyfile(fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
 end

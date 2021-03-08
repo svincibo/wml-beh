@@ -133,7 +133,7 @@ end
 %     Screen('Flip', prefs.w3);
 
 % Get image.
-k = [7 7 133 133];
+k = [7 7 293 293];
 prefs.image = Screen('GetImage', prefs.w3, k);
 
 % Get dynamic. Save input_lines, as is.

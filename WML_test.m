@@ -14,14 +14,14 @@ addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 sca; clear all; clc;
 Screen('Preference','SkipSyncTests', 1);
 PsychJavaTrouble;
-localDir = '~/Desktop/WML/';
+localDir = '~/Desktop/wml-beh/';
 t_retry = [];
 
 % saveDir = fullfile(rootDir, 'data');
 
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
-saveDir = '~/Google Drive/data/';
+saveDir = '~/Google Drive/data-beh/';
 
 % Import audio for alert.
 [beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
@@ -36,11 +36,9 @@ prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101)
 load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 
 % Set group training variables.
-prefs.group = training_group(find(subID == prefs.subID));
-prefs.group_label = training_group_labels{prefs.group};
+prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
-disp(['You have indicated that this is participant ' num2str(prefs.subID) '. This is a ' prefs.group_label ' participant.']);
-ch = input('Is this information correct [y, n]? ', 's');
+ch = input(['You have indicated that this is participant ' num2str(prefs.subID) '. Is this correct [y, n]? '], 's');
 if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
     error('Please start over and be sure to enter the correct participant ID.');
 end
@@ -151,8 +149,14 @@ HideCursor([], prefs.w1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get the image files for the experiment
-td_imageFolder = fullfile(localDir, 'stimuli/typed_symbols_all/');
-
+if prefs.group == 1
+    td_imageFolder = fullfile(localDir, 'stimuli/typed_symbols_all_group1/');
+elseif prefs.group == 2
+    td_imageFolder = fullfile(localDir, 'stimuli/typed_symbols_all_group2/');
+elseif prefs.group == 3
+    td_imageFolder = fullfile(localDir, 'stimuli/typed_symbols_all_group3/');
+end
+    
 % Select the distractor block, so that a participant does not see the same
 % distractor more than once in the experiment and so that the distractors
 % occur randomly across blocks between participants.
@@ -193,7 +197,7 @@ if issueflag
 else
     outputfile = fopen([saveDir '/sub' num2str(prefs.subID) '_test_day' num2str(prefs.day) '.txt'],'a');
 end
-fprintf(outputfile, 'subID\t imageCondition\t trial\t imageFile\t response\t RT\n');
+fprintf(outputfile, 'subID\t imageCondition\t trial\t imageFile\t response\t RT');
 
 % Randomize the trial list
 randomizedTrials = randperm(nTrials);
@@ -342,9 +346,9 @@ for t = randomizedTrials
     Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
     
     % Save results to file
-    fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %f\n',...
+    fprintf(outputfile, '\n%d\t %s\t %d\t %s\t %s\t %f',...
         prefs.subID, td_imageFolder, trial, td_file, resp, rt);
-    
+
     % Clear textures
     Screen(td_imageDisplay,'Close');
     
@@ -390,7 +394,7 @@ clear t;
 % If there are items that need to be represented, then represent them here
 % in random order.
 if length(t_retry) > 0
-    fprintf(outputfile, 'repeats\n');
+    fprintf(outputfile, '\nrepeats\t\t\t\t\t');
     
     while length(t_retry) > 0
         
@@ -508,7 +512,7 @@ if length(t_retry) > 0
             Screen('Flip', prefs.w1, tFixation + fixationDuration - slack,0);
             
             % Save results to file
-            fprintf(outputfile, '%d\t %s\t %d\t %s\t %s\t %s\t %f\n',...
+            fprintf(outputfile, '\n%d\t %s\t %d\t %s\t %s\t %s\t %f',...
                 prefs.subID, td_imageFolder, t, textString, td_file, resp, rt);
             
             % Clear textures
