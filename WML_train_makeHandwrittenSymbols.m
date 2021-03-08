@@ -129,7 +129,7 @@ end
 %%%%%%%%%%%%%%%%%%%%% Parameters: DO NOT CHANGE. %%%%%%%%%%%%%%%%%%%%%%%%
 prefs.lengthEvents = 4; % This is the number of seconds you'll have for each stimulus.
 % prefs.scale = 300; % You can increase the size of the box by increasing this number.
-prefs.penWidth = 6; % You can increase the thickness of the pen-tip by increasing this number, but there's a limit to the thickness... around 10 maybe.
+prefs.penWidth = 2.5; % You can increase the thickness of the pen-tip by increasing this number, but there's a limit to the thickness... around 10 maybe.
 prefs.backColor = [255 255 255];   % (0 0 0) is black, (255 255 255) is white
 prefs.foreColor = [0 0 0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -338,7 +338,7 @@ for trial = 1:length(tsymbol_dir)
 %             if issueflag
 %                 imwrite(prefs.image, fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '_trial' num2str(trial) '_' prefs.symbol_name '_' datestr(now,'mm-dd-yyyy_HH-MM')]));
 %             else
-                imwrite(prefs.image, fullfile(saveDir, 'handwritten', prefs.symbol_name));
+                imwrite(prefs.image, fullfile(saveDir, 'handwritten', ['H' prefs.symbol_name]));
 %             end
 %         end
         
