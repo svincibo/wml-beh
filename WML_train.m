@@ -168,7 +168,7 @@ end
 fprintf(outputfile, 'subID\t group\t day\t symbolname\t block\t trial\t drawduration\t trialduration\n');
 
 % Hide cursor and orient to the Matlab command window for user input.
-% HideCursor([], prefs.w1);
+HideCursor([], prefs.w1);
 commandwindow;
 
 %% Record.

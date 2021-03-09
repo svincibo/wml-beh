@@ -14,7 +14,7 @@ addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 sca; clear all; clc;
 Screen('Preference','SkipSyncTests', 1);
 PsychJavaTrouble;
-localDir = '~/Desktop/WML/';
+localDir = '~/Desktop/wml-beh/';
 t_retry = [];
 % saveDir = fullfile(rootDir, 'data');
 
@@ -24,7 +24,7 @@ addpath(genpath(fullfile(localDir, 'supportFiles')));
 % Import audio for alert.
 [beep_y, beep_Fs] = audioread(fullfile(localDir, 'supportFiles/doorbell.wav'));
 
-saveDir = '~/Google Drive/data/';
+saveDir = '~/Google Drive/data-beh/';
 
 settingsImageSequence; % Load all the settings from the file
 rand('state', sum(100*clock)); % Initialize the random number generator
@@ -36,10 +36,9 @@ prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101)
 load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 
 % Set group training variables.
-prefs.group = training_group(find(subID == prefs.subID));
-prefs.group_label = training_group_labels{prefs.group};
+prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
-disp(['You have indicated that this is participant ' num2str(prefs.subID) '. This is a ' prefs.group_label ' participant.']);
+disp(['You have indicated that this is participant ' num2str(prefs.subID) '.']);
 ch = input('Is this information correct [y, n]? ', 's');
 if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
     error('Please start over and be sure to enter the correct participant ID.');

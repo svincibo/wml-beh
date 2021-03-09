@@ -15,7 +15,7 @@
 addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 
 sca; clear all; clc; tic
-localDir = '~/Desktop/WML/';
+localDir = '~/Desktop/wml-beh/';
 saveDir = fullfile(localDir, 'stimuli');
 
 % Add location of support files to path.
@@ -38,10 +38,9 @@ prefs.subID = str2num(deblank(input('\nPlease enter the subID number (e.g., 101)
 load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 
 % Set group training variables.
-prefs.group = training_group(find(subID == prefs.subID));
-prefs.group_label = training_group_labels{prefs.group};
+prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
-disp(['You have indicated that this is participant ' num2str(prefs.subID) '. This is a ' prefs.group_label ' participant.']);
+disp(['You have indicated that this is participant ' num2str(prefs.subID) '.']);
 ch = input('Is this information correct [y, n]? ', 's');
 if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
     error('Please start over and be sure to enter the correct participant ID.');
@@ -266,42 +265,12 @@ for trial = 1:length(tsymbol_dir)
     % Move mouse to projector
     SetMouse((ceil(prefs.w1Width / 2) + prefs.w0Width), ceil(prefs.w1Height / 2))
     
-    if prefs.group == 1
         
         % Get and display drawing input.
         [prefs] = drawInk2_noboundarybox(prefs);
         
-    elseif prefs.group == 2
         
-        [prefs] = drawNoInk2(prefs);
-        
-    elseif prefs.group == 3
-        
-        % Find the appropriate symbol. Loop because sample is struct.
-        %             for k = 1:size(sample, 2)
-        
-        sample_tbl = struct2table(sub_yoke.sample);
-        
-        idx = find(strcmp(sample_tbl.symbol, prefs.symbol) & sample_tbl.block == block);
-        disp(idx)
-        %                 % Make sure that this instance comes from the same prefs.block as
-        %                 % it was drawn by the DI participant.
-        %                 if strcmp(sample(k).symbol, prefs.symbol) && sample(k).block == block
-        %
-        %                     idx = k;
-        %
-        %                 end
-        
-        %             end
-        
-        % Display.
-        [prefs] = watchDynamic(prefs, sub_yoke.sample(idx).dynamicStim);
-        
-    else
-        
-        error('Training group must be 1, 2, or 3.');
-        
-    end
+    
     
     % Append the sample from this round to the
     % end of the sample struct.
