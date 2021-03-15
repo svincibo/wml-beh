@@ -16,7 +16,7 @@ addpath(genpath(fullfile('Applications', 'Psychtoolbox')));
 
 sca; clear all; clc; tic
 localDir = '~/Desktop/wml-beh/';
-saveDir = fullfile(localDir, 'stimuli');
+saveDir = '~/Desktop/handwritten');
 
 % Add location of support files to path.
 addpath(genpath(fullfile(localDir, 'supportFiles')));
@@ -346,12 +346,12 @@ end
     save(fullfile(saveDir, ['handwritten_' datestr(now,'mm-dd-yyyy_HH-MM') '.mat']), 'sample');
 % end
 
-% Backup cloud storage to local device.
-copyfile(fullfile(saveDir, 'handwritten', ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
-copyfile(fullfile(saveDir, 'handwritten', ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
-if prefs.group == 1
-    copyfile(fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
-end
+% % Backup cloud storage to local device.
+% copyfile(fullfile(saveDir, 'handwritten', ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.mat']), fullfile(localDir, 'data'))
+% copyfile(fullfile(saveDir, 'handwritten', ['sub' num2str(prefs.subID) '_train_day' num2str(prefs.day) '*.txt']), fullfile(localDir, 'data'))
+% if prefs.group == 1
+%     copyfile(fullfile(saveDir, 'static_images', ['sub' num2str(prefs.subID) '_day' num2str(prefs.day) '*.bmp']), fullfile(localDir, 'data', 'static_images'))
+% end
 
 %% Close all.
 clear PsychImaging;
