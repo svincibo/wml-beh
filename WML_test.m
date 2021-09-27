@@ -38,60 +38,71 @@ load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 % Set group training variables.
 prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
-ch = input(['You have indicated that this is participant ' num2str(prefs.subID) '. Is this correct [y, n]? '], 's');
+% Set training day.
+prefs.day = str2num(input('Please enter the training day here [1, 2, 3, 4]: ', 's'));
+issueflag = 1; %legacy from the dialogue below in comments
+
+% Check.
+ch = input(['You have indicated that this is participant ' num2str(prefs.subID) ' and day ' num2str(prefs.day) '. Is this information correct [y, n]? '], 's');
 if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
     error('Please start over and be sure to enter the correct participant ID.');
 end
 clear ch
-
-% Look to see if there are any days for this subject already, if no, set
-% this as day 1. If yes, count how many and set day appropriately.
-if exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day4.mat']), 'file') == 2
-    disp('Records suggest that this participant has already completed 4 days! This is not possible.');
-    ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
-    if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
-        disp('If you are sure that you have entered the participant ID correctly,');
-        prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
-        flag = 1;
-    elseif strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
-        error('Please start over and be sure to enter the correct participant ID.');
-    else
-        error('Your response must be either yes or no. Please start over.');
-    end
-    clear ch ch2
-elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day3.mat']), 'file') == 2
-    prefs.day = 4; flag = 0;
-elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day2.mat']), 'file') == 2
-    prefs.day = 3; flag = 0;
-elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day1.mat']), 'file') == 2
-    prefs.day = 2; flag = 0;
-else
-    prefs.day = 1; flag = 0;
-end
-
-issueflag = 0;
-if flag == 0
-    
-    disp(['Records indicate that this is Day ' num2str(prefs.day) ' for this participant']);
-    ch = input('Is this correct [y, n]? ', 's');
-    if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
-        ch2 = input('Have you entered the participant ID correctly [y, n]? ', 's');
-        if strcmp(ch2, 'yes') || strcmp(ch2, 'YES') || strcmp(ch2, 'y') || strcmp(ch2, 'Y')
-            disp('If you are sure that you have entered the participant ID correctly,');
-            prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
-            issueflag = 1;
-        elseif strcmp(ch2, 'no') || strcmp(ch2, 'NO') || strcmp(ch2, 'n') || strcmp(ch2, 'N')
-            error('Please start over and be sure to enter the correct participant ID.');
-        else
-            error('Your response must be either yes or no. Please start over.');
-        end
-    else
-        disp('..............starting.............');
-    end
-    clear ch ch2
-    
-end
-clear flag
+ 
+% ch = input(['You have indicated that this is participant ' num2str(prefs.subID) '. Is this correct [y, n]? '], 's');
+% if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
+%     error('Please start over and be sure to enter the correct participant ID.');
+% end
+% clear ch
+% 
+% % Look to see if there are any days for this subject already, if no, set
+% % this as day 1. If yes, count how many and set day appropriately.
+% if exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day4.mat']), 'file') == 2
+%     disp('Records suggest that this participant has already completed 4 days! This is not possible.');
+%     ch = input('Are you sure that you have entered the participant ID correctly [y, n]? ', 's');
+%     if strcmp(ch, 'yes') || strcmp(ch, 'YES') || strcmp(ch, 'y') || strcmp(ch, 'Y')
+%         disp('If you are sure that you have entered the participant ID correctly,');
+%         prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
+%         flag = 1;
+%     elseif strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
+%         error('Please start over and be sure to enter the correct participant ID.');
+%     else
+%         error('Your response must be either yes or no. Please start over.');
+%     end
+%     clear ch ch2
+% elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day3.mat']), 'file') == 2
+%     prefs.day = 4; flag = 0;
+% elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day2.mat']), 'file') == 2
+%     prefs.day = 3; flag = 0;
+% elseif exist(fullfile(saveDir, ['sub' num2str(prefs.subID) '_test_day1.mat']), 'file') == 2
+%     prefs.day = 2; flag = 0;
+% else
+%     prefs.day = 1; flag = 0;
+% end
+% 
+% issueflag = 0;
+% if flag == 0
+%     
+%     disp(['Records indicate that this is Day ' num2str(prefs.day) ' for this participant']);
+%     ch = input('Is this correct [y, n]? ', 's');
+%     if strcmp(ch, 'no') || strcmp(ch, 'NO') || strcmp(ch, 'n') || strcmp(ch, 'N')
+%         ch2 = input('Have you entered the participant ID correctly [y, n]? ', 's');
+%         if strcmp(ch2, 'yes') || strcmp(ch2, 'YES') || strcmp(ch2, 'y') || strcmp(ch2, 'Y')
+%             disp('If you are sure that you have entered the participant ID correctly,');
+%             prefs.day = str2num(input('then enter the correct day here [1, 2, 3, 4]: ', 's'));
+%             issueflag = 1;
+%         elseif strcmp(ch2, 'no') || strcmp(ch2, 'NO') || strcmp(ch2, 'n') || strcmp(ch2, 'N')
+%             error('Please start over and be sure to enter the correct participant ID.');
+%         else
+%             error('Your response must be either yes or no. Please start over.');
+%         end
+%     else
+%         disp('..............starting.............');
+%     end
+%     clear ch ch2
+%     
+% end
+% clear flag
 
 %%%%%%%%%%%%%%%%%%%%% Parameters: DO NOT CHANGE. %%%%%%%%%%%%%%%%%%%%%%%%
 prefs.penWidth = 6; % You can increase the thickness of the pen-tip by increasing this number, but there's a limit to the thickness... around 10 maybe.
