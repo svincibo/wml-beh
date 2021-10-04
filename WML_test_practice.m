@@ -40,7 +40,7 @@ load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
 % Set training day.
-prefs.day = str2num(input('Please enter the training day here [1, 2, 3, 4]: ', 's'));
+prefs.day = str2num(input('Please enter the training day here [1, 2, 3, 4, 5]: ', 's'));
 issueflag = 1; %legacy from the dialogue below in comments
 
 % Check.
