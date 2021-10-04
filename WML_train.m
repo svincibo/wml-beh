@@ -40,7 +40,7 @@ load(fullfile(localDir, 'supportFiles/WML_subID_mappings.mat'));
 prefs.group = symbol_counterbalance_group(find(subID == prefs.subID));
 
 % Set training day.
-prefs.day = str2num(input('Please enter the training day here [1, 2, 3, 4]: ', 's'));
+prefs.day = str2num(input('Please enter the training day here [1, 2, 3, 4, 5]: ', 's'));
 issueflag = 1; %legacy from the dialogue below in comments
 
 % Check.
@@ -221,11 +221,20 @@ tsymbol_dir = tsymbol_dir(arrayfun(@(x) x.name(1), tsymbol_dir) ~= '.');
 
 % % Get randomization vector;
 % idx = randperm(length(tsymbol_dir));
+
+% set it so that there are 10 blocks for training days but only 1 block for
+% the final test on day 5
+if prefs.day == 5
+    nblocks = 1;
+else
+    nblocks = 10;
+end
+
 %
 % % Randomize the target symbols so that they are presented in random order.
 % tsymbol_dir = tsymbol_dir(idx);
 count = 1;
-for block = 1:10
+for block = 1:nblocks
     
     % Set up symbol randomization for this block
     s = randperm(40);
@@ -353,7 +362,7 @@ for block = 1:10
         
     end
     
-    if block == 10
+    if (prefs.day == 5 && block == 1) || (block == 10)
         
         Screen('FillRect', prefs.w2, prefs.backColor);
         Screen('Flip', prefs.w2, [], [], [], 0); %0 to flip all onscreen windows
